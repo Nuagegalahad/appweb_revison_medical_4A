@@ -993,6 +993,170 @@
 
     .auth-btn:active { transform: scale(0.95); }
 
+    /* ===== OVERLAY GIF DE FÉLICITATIONS ===== */
+    .gif-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(46, 26, 26, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10002;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+      animation: gifFadeIn 0.35s ease both;
+    }
+
+    .gif-overlay.show { display: flex; }
+
+    .gif-modal {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 26px;
+      padding: 22px 18px 20px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+      animation: gifPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      position: relative;
+      overflow: hidden;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    /* Anneau arc-en-ciel tournant en arrière-plan */
+    .gif-modal::before {
+      content: "";
+      position: absolute;
+      top: -60%;
+      left: -60%;
+      width: 220%;
+      height: 220%;
+      background: conic-gradient(from 0deg,
+        #E05A5A, #F0A0B0, #FFD166, #4CAF82, #66C7E8, #B388EB, #E05A5A);
+      opacity: 0.14;
+      animation: gifSpin 9s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .gif-modal > * { position: relative; z-index: 1; }
+
+    .gif-emoji-row {
+      font-size: 1.6rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 4px;
+      animation: gifBounce 1.4s ease-in-out infinite;
+      user-select: none;
+    }
+
+    .gif-image {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      max-height: 260px;
+      object-fit: contain;
+      border-radius: 18px;
+      margin: 0 auto 12px;
+      display: block;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      background: #fff;
+    }
+
+    .gif-fallback {
+      display: none;
+      font-size: 5rem;
+      line-height: 1.2;
+      margin: 6px 0 10px;
+      animation: gifBounce 1.2s ease-in-out infinite;
+      user-select: none;
+    }
+
+    .gif-title {
+      font-family: "Baloo 2", cursive;
+      font-weight: 800;
+      font-size: 1.7rem;
+      color: var(--coral);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      line-height: 1.15;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 8px rgba(224, 90, 90, 0.2);
+      word-break: break-word;
+    }
+
+    .gif-text {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.45;
+      margin-bottom: 16px;
+      word-break: break-word;
+    }
+
+    .gif-text .accent { color: var(--green); font-weight: 800; }
+
+    .gif-close-btn {
+      background: linear-gradient(145deg, var(--green), #3CB870);
+      border: none;
+      border-radius: 50px;
+      color: white;
+      cursor: pointer;
+      font-family: "Baloo 2", cursive;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      min-height: var(--touch-size);
+      padding: 14px 28px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(76, 175, 130, 0.35);
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+
+    .gif-close-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 4px 14px rgba(76, 175, 130, 0.25);
+    }
+
+    /* Petits confettis animés dans la modale */
+    .gif-confetti {
+      position: absolute;
+      top: -20px;
+      font-size: 1.2rem;
+      animation: gifFall linear infinite;
+      pointer-events: none;
+      user-select: none;
+      z-index: 2;
+    }
+
+    @keyframes gifFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes gifPopIn {
+      0% { transform: scale(0.55) rotate(-4deg); opacity: 0; }
+      60% { transform: scale(1.05) rotate(1.5deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes gifSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes gifBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes gifFall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(460px) rotate(540deg); opacity: 0; }
+    }
+
     @media (max-width: 480px) {
       :root { --font-base: 17px; --touch-size: 44px; }
       .header h1 { font-size: 1.6rem; }
@@ -1019,6 +1183,11 @@
       .toast { font-size: 0.85rem; padding: 10px 16px; }
       .payment-engagement { font-size: 0.75rem; padding: 12px 10px; }
       .login-box { padding: 1.5rem; }
+      .gif-modal { padding: 18px 14px; border-radius: 22px; }
+      .gif-title { font-size: 1.35rem; }
+      .gif-text { font-size: 0.85rem; }
+      .gif-close-btn { font-size: 0.95rem; padding: 12px 20px; }
+      .gif-image { max-height: 220px; }
     }
 
     @media (max-width: 360px) {
@@ -1043,6 +1212,9 @@
       .rewards-section { padding: 10px 12px; }
       .reward-item { padding: 4px 0; gap: 6px; }
       .payment-engagement { font-size: 0.7rem; padding: 10px 8px; }
+      .gif-title { font-size: 1.15rem; }
+      .gif-text { font-size: 0.8rem; }
+      .gif-fallback { font-size: 3.6rem; }
     }
   </style>
 </head>
@@ -1190,6 +1362,21 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- OVERLAY GIF DE FÉLICITATIONS -->
+<div class="gif-overlay" id="gifOverlay">
+  <div class="gif-modal" id="gifModal">
+    <div class="gif-emoji-row">🎉 ✨ 🏆 ✨ 🎉</div>
+    <img class="gif-image" id="congratsGif" alt="Félicitations Piso !" />
+    <div class="gif-fallback" id="gifFallback">🥳🎊💃</div>
+    <div class="gif-title">Bravo Piso !</div>
+    <div class="gif-text">
+      Tu as révisé <span class="accent">tous les chapitres</span> !<br>
+      Tu es une machine 💪 Continue de briller ✨
+    </div>
+    <button class="gif-close-btn" id="gifCloseBtn">Continuer 🎈</button>
+  </div>
+</div>
+
 <script>
   /* ================================================================
      FIREBASE CONFIGURATION
@@ -1210,10 +1397,19 @@
   const database = firebase.database();
 
   // ===== CONSTANTES =====
-  // Nouvelle deadline : 14 septembre 2026 (deux semaines après le 31 août)
   const DEADLINE = new Date('2026-09-14T23:59:59').getTime();
   const START_DATE = new Date('2026-06-15T00:00:00').getTime();
   const TOTAL_DURATION = DEADLINE - START_DATE;
+
+  // Liste de GIFs de félicitations drôles (chargés depuis le net, avec fallback en chaîne)
+  const CONGRATS_GIFS = [
+    // Minions / célébration
+    'https://media.giphy.com/media/g9582DNuQppxC/giphy.gif',
+    // Danse de la victoire
+    'https://media.giphy.com/media/26u4cqi1FgaQe4t1K/giphy.gif',
+    // Confettis / joie
+    'https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif'
+  ];
 
   const MOTIVATIONAL_MESSAGES = [
     "Piso, chaque jour tu deviens plus forte. Continue d'avancer !",
@@ -1245,6 +1441,11 @@
   let rewardsLost = false;
   let user = null;
   let dataListener = null;
+
+  // État du GIF de félicitations
+  let gifShown = false;      // évite de rejouer en boucle sur la même session
+  let gifIndex = 0;          // index courant dans CONGRATS_GIFS
+  let gifConfettiTimer = null;
 
   // ===== RÉFÉRENCES DOM =====
   const $ = (id) => document.getElementById(id);
@@ -1286,7 +1487,13 @@
     loginBtn: $('loginBtn'),
     loginError: $('loginError'),
     authStatus: $('authStatus'),
-    logoutBtn: $('logoutBtn')
+    logoutBtn: $('logoutBtn'),
+    // GIF
+    gifOverlay: $('gifOverlay'),
+    gifModal: $('gifModal'),
+    congratsGif: $('congratsGif'),
+    gifFallback: $('gifFallback'),
+    gifCloseBtn: $('gifCloseBtn')
   };
 
   // ===== UTILITAIRES =====
@@ -1334,6 +1541,76 @@
     });
     return rewards;
   }
+
+  /* ================================================================
+     ANIMATION GIF DE FÉLICITATIONS
+     ================================================================ */
+  function spawnConfetti() {
+    const modal = elements.gifModal;
+    const emojis = ['🎉', '✨', '🎊', '⭐', '💖', '🏆', '🎈', '💫', '🌟'];
+    for (let i = 0; i < 16; i++) {
+      const span = document.createElement('span');
+      span.className = 'gif-confetti';
+      span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      span.style.left = (Math.random() * 95) + '%';
+      span.style.animationDuration = (2.2 + Math.random() * 2.5) + 's';
+      span.style.animationDelay = (Math.random() * 2.5) + 's';
+      span.style.fontSize = (0.9 + Math.random() * 0.9) + 'rem';
+      modal.appendChild(span);
+    }
+    // Nettoyer les confettis après un moment
+    clearTimeout(gifConfettiTimer);
+    gifConfettiTimer = setTimeout(() => {
+      modal.querySelectorAll('.gif-confetti').forEach(el => el.remove());
+    }, 9000);
+  }
+
+  function loadGif(index) {
+    const img = elements.congratsGif;
+    if (index >= CONGRATS_GIFS.length) {
+      // Tous les GIFs ont échoué → fallback emoji géant
+      img.style.display = 'none';
+      elements.gifFallback.style.display = 'block';
+      return;
+    }
+    gifIndex = index;
+    img.style.display = 'block';
+    elements.gifFallback.style.display = 'none';
+    img.src = CONGRATS_GIFS[index];
+  }
+
+  function showCongratsGif() {
+    if (gifShown) return;
+    gifShown = true;
+
+    const img = elements.congratsGif;
+
+    // Gestion de secours : si un GIF ne charge pas, on tente le suivant
+    img.onerror = () => {
+      loadGif(gifIndex + 1);
+    };
+
+    loadGif(0);
+    spawnConfetti();
+    elements.gifOverlay.classList.add('show');
+  }
+
+  function hideCongratsGif() {
+    elements.gifOverlay.classList.remove('show');
+    // Retirer les confettis
+    elements.gifModal.querySelectorAll('.gif-confetti').forEach(el => el.remove());
+  }
+
+  // Fermeture : bouton, clic sur le fond, touche Échap
+  elements.gifCloseBtn.addEventListener('click', hideCongratsGif);
+  elements.gifOverlay.addEventListener('click', (e) => {
+    if (e.target === elements.gifOverlay) hideCongratsGif();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && elements.gifOverlay.classList.contains('show')) {
+      hideCongratsGif();
+    }
+  });
 
   // ===== RENDU =====
   function renderRewards() {
@@ -1524,7 +1801,6 @@
   // ===== CALENDRIER =====
   function buildCalendar() {
     const start = new Date(2026, 5, 15);
-    // Nouvelle date de fin : 14 septembre 2026
     const end = new Date(2026, 8, 14);
     const grid = elements.calendarGrid;
     const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
@@ -1561,6 +1837,7 @@
     const done = getDoneCount(chapters);
     const remaining = total - done;
     const allDone = (total > 0 && remaining === 0);
+
     if (diff <= 0) {
       elements.deathDays.textContent = '00';
       elements.deathHours.textContent = '00';
@@ -1588,17 +1865,22 @@
       elements.deathMinutes.className = 'death-timer-number' + warnClass;
       elements.deathSeconds.className = 'death-timer-number' + warnClass;
     }
+
     if (allDone) {
       elements.congratsSvg.classList.add('show');
       elements.deathMessage.classList.remove('show');
       elements.deathTimerMessage.innerHTML = '✅ <span class="done">Objectif atteint !</span> Tous les chapitres sont révisés.';
       elements.congratsBanner.classList.add('show');
+      // 🎉 Déclenche le GIF de félicitations
+      showCongratsGif();
     } else {
       elements.congratsSvg.classList.remove('show');
       if (diff <= 0) elements.deathMessage.classList.add('show');
       else elements.deathMessage.classList.remove('show');
       elements.congratsBanner.classList.remove('show');
       if (diff > 0) elements.deathTimerMessage.innerHTML = 'avant la suppression de toutes les récompenses';
+      // Réarme le GIF pour la prochaine fois qu'elle termine tout
+      gifShown = false;
     }
   }
 
@@ -1687,7 +1969,7 @@
       status.textContent = 'Connecté';
       logoutBtn.style.display = 'inline-block';
       overlay.classList.remove('login-overlay--visible');
-      // Lancer l'écoute des données si ce n'est pas déjà fait
+
       if (!dataListener) {
         dataListener = database.ref('data').on('value', (snapshot) => {
           const data = snapshot.val() || {};
@@ -1716,16 +1998,17 @@
       status.textContent = 'Déconnecté';
       logoutBtn.style.display = 'none';
       overlay.classList.add('login-overlay--visible');
-      // Détacher l'écoute si elle existe
+
       if (dataListener) {
         database.ref('data').off('value', dataListener);
         dataListener = null;
       }
-      // Vider l'affichage
       chapters = [];
       themes = [];
       unlockedRewards = [];
       rewardsLost = false;
+      gifShown = false;
+      hideCongratsGif();
       renderStats();
       renderRewards();
       renderList();
@@ -1773,17 +2056,14 @@
     await auth.signOut();
   });
 
-  // Écouteur d'état Firebase
   auth.onAuthStateChanged((firebaseUser) => {
     user = firebaseUser;
     updateAuthUI();
   });
 
-  // Raccourci : appuyer sur Entrée dans les champs de connexion
   elements.loginEmail.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.loginBtn.click(); });
   elements.loginPassword.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.loginBtn.click(); });
 
-  // ===== AUTRES ÉVÉNEMENTS UI =====
   elements.addToggle.addEventListener('click', () => {
     elements.addForm.classList.toggle('open');
     elements.addToggle.classList.toggle('open');
@@ -1812,7 +2092,7 @@
   });
   elements.searchInput.addEventListener('input', renderList);
 
-  // ===== INITIALISATION (hors authentification) =====
+  // ===== INITIALISATION =====
   function displayDailyMessage() {
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 0);
@@ -1821,18 +2101,12 @@
   }
   displayDailyMessage();
 
-  // Mise à jour du compte à rebours toutes les secondes (même déconnecté)
   setInterval(() => {
     updateDeathCountdown();
     buildCalendar();
   }, 1000);
 
-  // Construire le calendrier initial
   buildCalendar();
-
-  // L'interface utilisateur est gérée via onAuthStateChanged
-  // On affiche l'overlay de connexion dès le départ
-  // Le reste se fera automatiquement.
 </script>
 
 </body>
