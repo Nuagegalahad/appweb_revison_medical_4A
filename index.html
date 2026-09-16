@@ -196,18 +196,6 @@
       padding: 12px 14px;
       margin-bottom: 14px;
       box-shadow: var(--shadow);
-      transition: opacity 0.4s, transform 0.4s;
-    }
-
-    .rewards-section.lost {
-      opacity: 0.6;
-      filter: grayscale(0.8);
-      pointer-events: none;
-    }
-
-    .rewards-section.lost .reward-status {
-      background: #ccc !important;
-      color: #666 !important;
     }
 
     .rewards-title {
@@ -231,8 +219,6 @@
       font-weight: 700;
       white-space: nowrap;
     }
-
-    .rewards-title .lost-badge { background: var(--coral) !important; }
 
     .reward-item {
       display: flex;
@@ -260,7 +246,6 @@
 
     .reward-badge.locked { background: #f0ece6; color: var(--muted); }
     .reward-badge.unlocked { background: var(--coral); color: white; box-shadow: 0 2px 10px rgba(224, 90, 90, 0.25); }
-    .reward-badge.lost { background: #ccc; color: #888; }
 
     .reward-info { flex: 1; min-width: 80px; }
     .reward-amount { font-weight: 700; color: var(--text); font-size: 0.95rem; }
@@ -277,19 +262,6 @@
 
     .reward-status.locked { color: var(--muted); background: #f0ece6; }
     .reward-status.unlocked { color: white; background: var(--green); }
-    .reward-status.lost { color: #888; background: #e0e0e0; }
-
-    .lost-message {
-      background: rgba(224, 90, 90, 0.08);
-      border: 1.5px solid var(--coral);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      text-align: center;
-      font-weight: 700;
-      color: var(--coral);
-      margin-top: 8px;
-      font-size: 0.9rem;
-    }
 
     /* ===== ADD CARDS, SEARCH, etc. ===== */
     .add-card {
@@ -711,13 +683,6 @@
 
     .payment-engagement strong { color: var(--navy); font-weight: 700; }
     .payment-engagement .icon { font-size: 1rem; margin-right: 6px; }
-    .payment-engagement .highlight { color: var(--coral); font-weight: 700; }
-    .payment-engagement .clause {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px dashed rgba(200, 180, 160, 0.4);
-      font-size: 0.8rem;
-    }
 
     /* ===== OVERLAY DE CONNEXION ===== */
     .login-overlay {
@@ -895,7 +860,6 @@
       <span id="pointsDisplay">0.00 €</span>
     </div>
     <div id="rewardsList"></div>
-    <div id="lostMessageContainer"></div>
     <div id="rewardsTotalLine" style="text-align:center; margin-top:6px; font-size:0.75rem; color:var(--muted);">
       Potentiel total : <strong>100,00 €</strong> (répartition dynamique)
     </div>
@@ -954,13 +918,6 @@
   <div class="payment-engagement">
     <div><span class="icon">📜</span><strong>Engagement de paiement</strong></div>
     <p style="margin-top: 4px;">L’ensemble des gains cumulés (récompenses débloquées) sera versé à partir du <strong>mois de novembre 2026</strong>.</p>
-    <div class="clause">
-      ⚠️ <span class="highlight">Clause de suppression :</span><br />
-      Si tous les chapitres ne sont pas révisés avant le <strong>14 septembre 2026 à 23h59</strong>,
-      <span class="highlight">toutes les récompenses obtenues seront définitivement supprimées</span>,
-      même celles déjà débloquées. Seul l’achèvement de l’intégralité des chapitres
-      permet de sécuriser les gains.
-    </div>
   </div>
 
 </div>
@@ -986,10 +943,7 @@
   const auth = firebase.auth();
   const database = firebase.database();
 
-  // ===== CONSTANTES =====
-  const DEADLINE = new Date('2026-09-14T23:59:59').getTime();
-
-  // Messages d'excuses (remplace les anciens messages de motivation)
+  // ===== MESSAGES D'EXCUSES (tournent chaque jour) =====
   const APOLOGY_MESSAGES = [
     "Désolé Piso d'avoir commis les mêmes erreurs.",
     "Pardon Piso, je sais que j'ai répété les mêmes erreurs. Je suis vraiment désolé.",
@@ -1017,7 +971,6 @@
   let chapters = [];
   let themes = [];
   let unlockedRewards = [];
-  let rewardsLost = false;
   let user = null;
   let dataListener = null;
 
@@ -1041,7 +994,6 @@
     pointsDisplay: $('pointsDisplay'),
     toast: $('toast'),
     rewardsSection: $('rewardsSection'),
-    lostMessageContainer: $('lostMessageContainer'),
     themeToggle: $('themeToggle'),
     themeForm: $('themeForm'),
     newThemeName: $('newThemeName'),
@@ -1106,34 +1058,6 @@
   // ===== RENDU =====
   function renderRewards() {
     const rewards = generateRewards();
-    if (rewardsLost) {
-      elements.rewardsSection.classList.add('lost');
-      elements.pointsDisplay.textContent = '💔 Perdues';
-      elements.pointsDisplay.className = 'lost-badge';
-      elements.lostMessageContainer.innerHTML = `
-        <div class="lost-message">
-          ⛔ Récompenses supprimées<br />
-          <span style="font-size:0.8rem;font-weight:400;">
-            La date limite (14 septembre 2026) a été dépassée sans que tous les chapitres ne soient révisés.
-            Toutes les récompenses ont été définitivement supprimées.
-          </span>
-        </div>
-      `;
-      elements.rewardsList.innerHTML = rewards.map(r => `
-        <div class="reward-item">
-          <div class="reward-badge lost">${r.emoji}</div>
-          <div class="reward-info">
-            <div class="reward-amount">${r.amount.toFixed(2)} €</div>
-            <div class="reward-desc">${r.label}</div>
-          </div>
-          <div class="reward-status lost">💔 Supprimée</div>
-        </div>
-      `).join('');
-      return;
-    }
-    elements.rewardsSection.classList.remove('lost');
-    elements.pointsDisplay.className = '';
-    elements.lostMessageContainer.innerHTML = '';
     const newlyUnlocked = [];
     rewards.forEach(r => {
       if (r.condition() && !unlockedRewards.includes(r.id)) {
@@ -1388,7 +1312,7 @@
       if (!dataListener) {
         dataListener = database.ref('data').on('value', (snapshot) => {
           const data = snapshot.val() || {};
-          const chapterKeys = Object.keys(data).filter(key => !['rewardsLost', 'themes', 'unlockedRewards'].includes(key));
+          const chapterKeys = Object.keys(data).filter(key => !['themes', 'unlockedRewards'].includes(key));
           chapters = chapterKeys.map(key => ({ key, ...data[key] }));
           themes = data.themes || [];
           const chapterThemes = [...new Set(chapters.map(ch => ch.theme))];
@@ -1396,8 +1320,6 @@
           chapterThemes.forEach(ct => { if (ct && !themes.includes(ct)) { themes.push(ct); needUpdate = true; } });
           if (needUpdate) database.ref('data/themes').set(themes);
           unlockedRewards = data.unlockedRewards || [];
-          rewardsLost = data.rewardsLost === true;
-          checkDeadline();
           renderStats();
           renderRewards();
           renderList();
@@ -1419,23 +1341,10 @@
       chapters = [];
       themes = [];
       unlockedRewards = [];
-      rewardsLost = false;
       renderStats();
       renderRewards();
       renderList();
       renderThemeManager();
-    }
-  }
-
-  function checkDeadline() {
-    const now = Date.now();
-    const total = chapters.length;
-    const done = getDoneCount(chapters);
-    const allDone = (total > 0 && done === total);
-    if (now > DEADLINE && !allDone && !rewardsLost) {
-      rewardsLost = true;
-      database.ref('data/rewardsLost').set(true);
-      showToast('⏰ La date limite est dépassée. Toutes les récompenses sont supprimées.');
     }
   }
 
