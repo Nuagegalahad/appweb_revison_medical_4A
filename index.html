@@ -14,7 +14,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <style>
-    /* ===== RESET & VARIABLES ===== */
     :root {
       --cream: #FFF8F0;
       --coral: #E05A5A;
@@ -128,7 +127,7 @@
       align-items: center;
       gap: 12px;
       box-shadow: var(--shadow);
-      transition: opacity 0.3s;
+      transition: opacity 0.4s;
     }
 
     .daily-message-icon {
@@ -143,6 +142,250 @@
       margin: 0;
       line-height: 1.4;
       word-break: break-word;
+    }
+
+    .countdown-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(160deg, #FFF7F9 0%, #F6F8FF 55%, #F1FAF5 100%);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 12px 14px;
+      margin-bottom: 14px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      isolation: isolate;
+    }
+
+    .countdown-card::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 46%;
+      width: 230px;
+      height: 230px;
+      margin: -115px 0 0 -115px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240, 160, 176, 0.30), rgba(240, 160, 176, 0) 70%);
+      animation: breathe 10s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(0.88); opacity: 0.5; }
+      50% { transform: scale(1.28); opacity: 0.9; }
+    }
+
+    .ripple-field {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ripple {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(212, 120, 138, 0.28);
+      animation: ripple 12s cubic-bezier(0.25, 0.6, 0.35, 1) infinite;
+    }
+
+    .ripple:nth-child(2) { animation-delay: 4s; }
+    .ripple:nth-child(3) { animation-delay: 8s; }
+
+    @keyframes ripple {
+      0% { transform: scale(0.5); opacity: 0; }
+      18% { opacity: 0.65; }
+      100% { transform: scale(3.2); opacity: 0; }
+    }
+
+    .countdown-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .countdown-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .countdown-grid {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin: 10px 0 8px;
+    }
+
+    .cd-cell {
+      flex: 1 1 0;
+      max-width: 92px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(232, 213, 196, 0.9);
+      border-radius: 14px;
+      padding: 8px 2px 6px;
+    }
+
+    .cd-num {
+      display: block;
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.05;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cd-num.tick {
+      animation: softTick 0.9s ease-out;
+    }
+
+    @keyframes softTick {
+      0% { opacity: 0.35; transform: translateY(2px) scale(0.97); }
+      100% { opacity: 1; transform: none; }
+    }
+
+    .cd-lab {
+      display: block;
+      font-size: 0.56rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .countdown-hint {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .countdown-hint strong {
+      color: var(--navy);
+    }
+
+    .calendar-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .calendar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(200, 180, 160, 0.15);
+    }
+
+    .calendar-title {
+      font-weight: 800;
+      color: var(--navy);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      word-break: break-word;
+    }
+
+    .calendar-count {
+      background: var(--navy);
+      color: white;
+      border-radius: 50px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .calendar-list {
+      max-height: 292px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .week-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(200, 180, 160, 0.12);
+    }
+
+    .week-item:last-child {
+      border-bottom: none;
+    }
+
+    .week-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .week-item.current .week-dot {
+      background: var(--coral);
+      box-shadow: 0 0 0 4px rgba(224, 90, 90, 0.14);
+    }
+
+    .week-item.exam {
+      background: rgba(212, 120, 138, 0.06);
+    }
+
+    .week-item.exam .week-dot {
+      background: var(--navy);
+      box-shadow: 0 0 0 4px rgba(212, 120, 138, 0.16);
+    }
+
+    .week-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .week-name {
+      font-weight: 700;
+      font-size: 0.86rem;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .week-range {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .week-meta {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+      background: #f4efe9;
+      border-radius: 50px;
+      padding: 3px 10px;
+      flex-shrink: 0;
+    }
+
+    .week-item.current .week-meta {
+      background: rgba(224, 90, 90, 0.12);
+      color: var(--coral);
+    }
+
+    .week-item.exam .week-meta {
+      background: var(--navy);
+      color: white;
     }
 
     .stats-row {
@@ -188,82 +431,6 @@
       word-break: break-word;
     }
 
-    /* ===== REWARDS ===== */
-    .rewards-section {
-      background: var(--card-bg);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      margin-bottom: 14px;
-      box-shadow: var(--shadow);
-    }
-
-    .rewards-title {
-      font-weight: 700;
-      font-size: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: var(--navy);
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-
-    .rewards-title span:last-child {
-      background: var(--green);
-      color: white;
-      font-size: 0.85rem;
-      padding: 3px 12px;
-      border-radius: 50px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .reward-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(200, 180, 160, 0.15);
-      font-size: 0.95rem;
-      flex-wrap: wrap;
-    }
-
-    .reward-item:last-child { border-bottom: none; }
-
-    .reward-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-
-    .reward-badge.locked { background: #f0ece6; color: var(--muted); }
-    .reward-badge.unlocked { background: var(--coral); color: white; box-shadow: 0 2px 10px rgba(224, 90, 90, 0.25); }
-
-    .reward-info { flex: 1; min-width: 80px; }
-    .reward-amount { font-weight: 700; color: var(--text); font-size: 0.95rem; }
-    .reward-desc { font-size: 0.75rem; color: var(--muted); word-break: break-word; }
-
-    .reward-status {
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 2px 10px;
-      border-radius: 30px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .reward-status.locked { color: var(--muted); background: #f0ece6; }
-    .reward-status.unlocked { color: white; background: var(--green); }
-
-    /* ===== ADD CARDS, SEARCH, etc. ===== */
     .add-card {
       background: var(--card-bg);
       border: 1.5px solid var(--border);
@@ -343,7 +510,9 @@
       padding-left: 4px;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
       border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
       font-family: "Baloo 2", cursive;
@@ -358,9 +527,9 @@
       min-height: var(--touch-size);
     }
 
-    input[type="text"]::placeholder { color: #c4b4a4; font-size: 0.9rem; }
+    input::placeholder { color: #c4b4a4; font-size: 0.9rem; }
 
-    input[type="text"]:focus {
+    input:focus {
       border-color: var(--navy);
       box-shadow: 0 0 0 3px rgba(196, 96, 122, 0.08);
     }
@@ -446,9 +615,12 @@
       min-height: var(--touch-size);
       display: flex;
       align-items: center;
+      flex: 1;
+      justify-content: center;
     }
 
     .filter-tab:active { transform: scale(0.95); }
+
     .filter-tab.active {
       background: var(--navy);
       border-color: var(--navy);
@@ -523,7 +695,6 @@
     .chapter-item:active { background: rgba(196, 96, 122, 0.03); }
     .chapter-item.is-done { background: rgba(76, 175, 130, 0.03); }
 
-    /* Groupe des deux cases à cocher */
     .cb-group {
       display: flex;
       gap: 5px;
@@ -549,7 +720,6 @@
 
     .custom-cb:active { transform: scale(0.9); }
 
-    /* Numéro affiché quand la case n'est pas cochée */
     .custom-cb::before {
       font-size: 0.7rem;
       font-weight: 800;
@@ -562,7 +732,6 @@
     .custom-cb.cb2::before { content: "2"; }
     .custom-cb.checked::before { display: none; }
 
-    /* 2ème relecture : bordure pointillée */
     .custom-cb.cb2 { border-style: dashed; }
 
     .custom-cb.checked {
@@ -571,7 +740,6 @@
       box-shadow: 0 2px 10px rgba(76, 175, 130, 0.25);
     }
 
-    /* La 2ème case cochée prend la couleur corail */
     .custom-cb.cb2.checked {
       background: linear-gradient(135deg, var(--navy), #B85F76);
       box-shadow: 0 2px 10px rgba(212, 120, 138, 0.28);
@@ -638,7 +806,7 @@
     }
 
     .theme-list-item:last-child { border-bottom: none; }
-    .theme-list-name { flex: 1; }
+    .theme-list-name { flex: 1; word-break: break-word; }
     .theme-list-actions .btn-icon { width: 32px; height: 32px; font-size: 0.9rem; }
 
     .toast {
@@ -667,7 +835,7 @@
     .toast.show { transform: translateX(-50%) translateY(0); }
 
     .payment-engagement {
-      margin-top: 30px;
+      margin-top: 26px;
       padding: 16px 14px;
       background: rgba(212, 120, 138, 0.06);
       border-radius: var(--radius-sm);
@@ -684,7 +852,6 @@
     .payment-engagement strong { color: var(--navy); font-weight: 700; }
     .payment-engagement .icon { font-size: 1rem; margin-right: 6px; }
 
-    /* ===== OVERLAY DE CONNEXION ===== */
     .login-overlay {
       display: none;
       position: fixed;
@@ -718,6 +885,7 @@
     }
 
     .login-box .form-group { margin-bottom: 0.8rem; }
+
     .login-box .btn {
       width: 100%;
       justify-content: center;
@@ -737,7 +905,7 @@
     }
 
     .login-box .btn:active { transform: scale(0.97); }
-    .login-box .input { width: 100%; }
+
     .login-error {
       color: #d63031;
       font-size: 0.85rem;
@@ -759,7 +927,7 @@
     }
 
     .auth-btn {
-      background: none;
+      background: var(--card-bg);
       border: 1.5px solid var(--border);
       border-radius: 50px;
       padding: 4px 14px;
@@ -769,7 +937,6 @@
       cursor: pointer;
       color: var(--navy);
       transition: background 0.2s;
-      background: var(--card-bg);
       white-space: nowrap;
     }
 
@@ -780,17 +947,16 @@
       .header h1 { font-size: 1.6rem; }
       .stat-num { font-size: 1.7rem; }
       .stat-label { font-size: 0.6rem; }
-      .reward-item { font-size: 0.85rem; }
-      .reward-amount { font-size: 0.85rem; }
-      .reward-desc { font-size: 0.7rem; }
-      .reward-badge { width: 28px; height: 28px; font-size: 0.85rem; }
+      .cd-num { font-size: 1.35rem; }
+      .cd-lab { font-size: 0.52rem; }
       .chapter-name { font-size: 0.85rem; }
-      .filter-tab { font-size: 0.7rem; padding: 6px 12px; }
+      .filter-tab { font-size: 0.68rem; padding: 6px 10px; }
       .btn-add { font-size: 0.9rem; }
-      input[type="text"] { font-size: 0.9rem; padding: 10px 12px; }
+      input[type="text"], input[type="email"], input[type="password"] { font-size: 0.9rem; padding: 10px 12px; }
       .toast { font-size: 0.85rem; padding: 10px 16px; }
-      .payment-engagement { font-size: 0.75rem; padding: 12px 10px; }
+      .payment-engagement { font-size: 0.78rem; padding: 12px 10px; }
       .login-box { padding: 1.5rem; }
+      .calendar-title { font-size: 0.8rem; }
     }
 
     @media (max-width: 360px) {
@@ -805,25 +971,24 @@
       .btn-icon { width: 36px; height: 36px; font-size: 0.9rem; }
       .theme-title { font-size: 0.85rem; }
       .theme-badge { font-size: 0.6rem; padding: 2px 8px; }
-      .rewards-section { padding: 10px 12px; }
-      .reward-item { padding: 4px 0; gap: 6px; }
-      .payment-engagement { font-size: 0.7rem; padding: 10px 8px; }
+      .cd-num { font-size: 1.15rem; }
+      .cd-lab { font-size: 0.48rem; }
+      .payment-engagement { font-size: 0.72rem; padding: 10px 8px; }
     }
   </style>
 </head>
 <body>
 
-<!-- OVERLAY DE CONNEXION -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <h2>Connexion sécurisée</h2>
     <div class="form-group">
       <div class="field-label">Email</div>
-      <input type="email" class="input" id="loginEmail" placeholder="votre@email.fr" />
+      <input type="email" id="loginEmail" placeholder="votre@email.fr" />
     </div>
     <div class="form-group">
       <div class="field-label">Mot de passe</div>
-      <input type="password" class="input" id="loginPassword" placeholder="••••••••" />
+      <input type="password" id="loginPassword" placeholder="••••••••" />
     </div>
     <button class="btn" id="loginBtn">Se connecter</button>
     <div class="login-error" id="loginError">Erreur d'identification</div>
@@ -842,8 +1007,26 @@
   </header>
 
   <div class="daily-message" id="dailyMessage">
-    <div class="daily-message-icon">🙏</div>
+    <div class="daily-message-icon" id="dailyMessageIcon">🌿</div>
     <p id="dailyMessageText"></p>
+  </div>
+
+  <div class="countdown-card">
+    <div class="ripple-field">
+      <span class="ripple"></span>
+      <span class="ripple"></span>
+      <span class="ripple"></span>
+    </div>
+    <div class="countdown-inner">
+      <div class="countdown-label">Le chemin jusqu'à l'examen</div>
+      <div class="countdown-grid">
+        <div class="cd-cell"><span class="cd-num" id="cdDays">0</span><span class="cd-lab">Jours</span></div>
+        <div class="cd-cell"><span class="cd-num" id="cdHours">00</span><span class="cd-lab">Heures</span></div>
+        <div class="cd-cell"><span class="cd-num" id="cdMinutes">00</span><span class="cd-lab">Minutes</span></div>
+        <div class="cd-cell"><span class="cd-num" id="cdSeconds">00</span><span class="cd-lab">Secondes</span></div>
+      </div>
+      <div class="countdown-hint">Examen le <strong>5 octobre 2026</strong> · respire, tout va bien 🌿</div>
+    </div>
   </div>
 
   <div class="stats-row">
@@ -853,16 +1036,12 @@
     <div class="stat-card reread"><div class="stat-num" id="statRead2">0</div><div class="stat-label">Relus</div></div>
   </div>
 
-  <!-- RÉCOMPENSES -->
-  <div class="rewards-section" id="rewardsSection">
-    <div class="rewards-title">
-      <span>Récompenses</span>
-      <span id="pointsDisplay">0.00 €</span>
+  <div class="calendar-card">
+    <div class="calendar-head">
+      <span class="calendar-title">📅 Calendrier des semaines</span>
+      <span class="calendar-count" id="weekCount">—</span>
     </div>
-    <div id="rewardsList"></div>
-    <div id="rewardsTotalLine" style="text-align:center; margin-top:6px; font-size:0.75rem; color:var(--muted);">
-      Potentiel total : <strong>100,00 €</strong> (répartition dynamique)
-    </div>
+    <div class="calendar-list" id="calendarList"></div>
   </div>
 
   <div class="add-card">
@@ -908,16 +1087,15 @@
 
   <div class="filter-tabs">
     <button class="filter-tab active" data-filter="all">Tous</button>
-    <button class="filter-tab" data-filter="todo">À réviser</button>
-    <button class="filter-tab" data-filter="done">Révisés</button>
-    <button class="filter-tab" data-filter="toread">À relire</button>
+    <button class="filter-tab" data-filter="toread">Pas encore relus</button>
+    <button class="filter-tab" data-filter="read">Relus</button>
   </div>
 
   <div id="chapterList"></div>
 
   <div class="payment-engagement">
-    <div><span class="icon">📜</span><strong>Engagement de paiement</strong></div>
-    <p style="margin-top: 4px;">L’ensemble des gains cumulés (récompenses débloquées) sera versé à partir du <strong>mois de novembre 2026</strong>.</p>
+    <div><span class="icon">💝</span><strong>Engagement de paiement</strong></div>
+    <p style="margin-top:4px;">Piso recevra <strong>150 €</strong> au mois de <strong>novembre 2026</strong>.</p>
   </div>
 
 </div>
@@ -925,9 +1103,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  /* ================================================================
-     FIREBASE CONFIGURATION
-     ================================================================ */
   const firebaseConfig = {
     apiKey: "AIzaSyBWhVrKgFLE0Y73FkI9sEo_an-cGRUQLWo",
     authDomain: "bdsiterevisionmed4a.firebaseapp.com",
@@ -943,38 +1118,41 @@
   const auth = firebase.auth();
   const database = firebase.database();
 
-  // ===== MESSAGES D'EXCUSES (tournent chaque jour) =====
-  const APOLOGY_MESSAGES = [
-    "Désolé Piso d'avoir commis les mêmes erreurs.",
-    "Pardon Piso, je sais que j'ai répété les mêmes erreurs. Je suis vraiment désolé.",
-    "Piso, je suis désolé. Tu méritais tellement mieux que mes erreurs répétées.",
-    "Je te demande pardon, Piso. J'aurais dû apprendre la première fois.",
-    "Désolé Piso. Mes excuses ne réparent pas tout, mais elles sont sincères.",
-    "Piso, pardonne-moi d'avoir encore fait les mêmes erreurs.",
-    "Je suis désolé, Piso. Tu as été patiente, et moi je n'ai pas su changer.",
-    "Pardon Piso. Je regrette chacune de ces erreurs que j'ai répétées.",
-    "Piso, je suis désolé du fond du cœur. Tu ne méritais pas ça.",
-    "Désolé Piso. Je sais que les mots ne suffisent pas, mais je suis vraiment navré.",
-    "Piso, excuse-moi d'avoir commis les mêmes erreurs encore et encore.",
-    "Je suis désolé, Piso. J'aurais dû être meilleur pour toi.",
-    "Pardon Piso. Je prends conscience de mes erreurs, et je suis désolé.",
-    "Désolé Piso. Tu mérites quelqu'un qui ne répète pas ses erreurs.",
-    "Piso, je suis vraiment désolé. Je te dois tellement d'excuses.",
-    "Désolé Piso d'avoir commis les mêmes erreurs. Je ferai mieux.",
-    "Pardon Piso, je n'ai pas été à la hauteur. Je suis désolé.",
-    "Piso, mes excuses les plus sincères pour ces erreurs répétées.",
-    "Désolé Piso. Je n'ai aucune excuse, juste des regrets sincères.",
-    "Piso, pardon. J'espère qu'un jour tu pourras me pardonner."
+  const EXAM_DATE = new Date(2026, 9, 5, 0, 0, 0);
+  const HALF_DAY_MS = 12 * 60 * 60 * 1000;
+
+  const ENCOURAGEMENTS = [
+    { i: "🌿", t: "Tu avances, un chapitre à la fois. Doucement mais sûrement." },
+    { i: "☀️", t: "Chaque page lue aujourd'hui est une victoire tranquille." },
+    { i: "💪", t: "Piso, tu es plus forte que tu ne le penses." },
+    { i: "🌸", t: "Prends ton temps, tu n'as rien à prouver à personne." },
+    { i: "📚", t: "Un petit pas aujourd'hui vaut mieux qu'un grand demain." },
+    { i: "🫶", t: "Tu fais de ton mieux, et c'est déjà énorme." },
+    { i: "🌙", t: "Repose-toi quand il faut, tu reviendras plus forte." },
+    { i: "✨", t: "Ta régularité vaut tous les talents du monde." },
+    { i: "🌱", t: "Chaque révision fait pousser un peu plus ta confiance." },
+    { i: "🍀", t: "Respire. Tu es exactement là où tu dois être." },
+    { i: "💛", t: "Je crois en toi, Piso. Vraiment." },
+    { i: "🎈", t: "Un chapitre coché, et tu peux être fière de toi." },
+    { i: "🌻", t: "Les efforts d'aujourd'hui seront ta réussite de demain." },
+    { i: "🧸", t: "Sois aussi douce avec toi que tu l'es avec les autres." },
+    { i: "🔆", t: "Tu es capable de grandes choses, une page à la fois." },
+    { i: "🌊", t: "Laisse les choses avancer à leur rythme, sans te presser." },
+    { i: "🕊️", t: "Un jour à la fois, un objectif à la fois." },
+    { i: "🍃", t: "Ta patience finira par payer, tu verras." },
+    { i: "⭐", t: "Tu es sur le bon chemin, continue comme ça." },
+    { i: "🎀", t: "Bravo pour tout ce que tu as déjà accompli, Piso." },
+    { i: "🌈", t: "Après l'effort vient toujours la lumière." },
+    { i: "💗", t: "Tu mérites de réussir, et tu vas y arriver." },
+    { i: "🧠", t: "Chaque relecture rend ton savoir plus solide." },
+    { i: "🎯", t: "Objectif : 5 octobre 2026. Tu y arriveras." }
   ];
 
-  // ===== ÉTAT =====
   let chapters = [];
   let themes = [];
-  let unlockedRewards = [];
   let user = null;
   let dataListener = null;
 
-  // ===== RÉFÉRENCES DOM =====
   const $ = (id) => document.getElementById(id);
   const elements = {
     statTotal: $('statTotal'),
@@ -990,10 +1168,7 @@
     chapterName: $('chapterName'),
     chapterTheme: $('chapterTheme'),
     themeListDatalist: $('themeList'),
-    rewardsList: $('rewardsList'),
-    pointsDisplay: $('pointsDisplay'),
     toast: $('toast'),
-    rewardsSection: $('rewardsSection'),
     themeToggle: $('themeToggle'),
     themeForm: $('themeForm'),
     newThemeName: $('newThemeName'),
@@ -1005,12 +1180,12 @@
     loginBtn: $('loginBtn'),
     loginError: $('loginError'),
     authStatus: $('authStatus'),
-    logoutBtn: $('logoutBtn')
+    logoutBtn: $('logoutBtn'),
+    calendarList: $('calendarList'),
+    weekCount: $('weekCount'),
+    dailyMessageIcon: $('dailyMessageIcon'),
+    dailyMessageText: $('dailyMessageText')
   };
-
-  // ===== UTILITAIRES =====
-  function getDoneCount(arr) { return arr.filter(ch => ch.done).length; }
-  function getDone2Count(arr) { return arr.filter(ch => ch.done2).length; }
 
   function showToast(message) {
     const toast = elements.toast;
@@ -1020,82 +1195,106 @@
     toast._timer = setTimeout(() => toast.classList.remove('show'), 4000);
   }
 
-  function getEmojiForTheme(theme) {
-    const map = {
-      "Dermatologie": "🧴",
-      "Maladie infectieuse": "🦠",
-      "Pneumologie": "🫁",
-      "Psychiatrie": "🧠",
-      "Rhumatologie": "🦴",
-      "Hématologie": "🩸",
-      "Endocrinologie": "🩺",
-      "Néphrologie": "🫘",
-      "Gastro-entérologie": "🍽️",
-      "Ophtalmologie": "👁️",
-      "ORL": "👂"
-    };
-    return map[theme] || "📌";
+  function displayEncouragement() {
+    const index = Math.floor(Date.now() / HALF_DAY_MS) % ENCOURAGEMENTS.length;
+    const item = ENCOURAGEMENTS[index];
+    elements.dailyMessageIcon.textContent = item.i;
+    elements.dailyMessageText.textContent = item.t;
   }
 
-  function isThemeComplete(theme) {
-    const themeChapters = chapters.filter(ch => ch.theme === theme);
-    return themeChapters.length > 0 && themeChapters.every(ch => ch.done);
+  function setNum(id, value) {
+    const el = document.getElementById(id);
+    if (!el || el.textContent === value) return;
+    el.textContent = value;
+    el.classList.remove('tick');
+    void el.offsetWidth;
+    el.classList.add('tick');
   }
 
-  function generateRewards() {
-    const fixedThemes = ["Traumatologie", "Cardiologie", "Neurologie"];
-    const otherThemes = themes.filter(t => !fixedThemes.includes(t));
-    const otherAmount = otherThemes.length > 0 ? 25 / otherThemes.length : 0;
-    const rewards = [];
-    rewards.push({ id: "traumatologie", condition: () => isThemeComplete("Traumatologie"), amount: 50, label: "Traumatologie terminée", emoji: "🦴" });
-    rewards.push({ id: "cardioneuro", condition: () => isThemeComplete("Cardiologie") && isThemeComplete("Neurologie"), amount: 25, label: "Cardiologie + Neurologie terminées", emoji: "❤️🧠" });
-    otherThemes.forEach(theme => {
-      rewards.push({ id: `other_${theme}`, condition: () => isThemeComplete(theme), amount: otherAmount, label: `${theme} terminée`, emoji: getEmojiForTheme(theme) });
-    });
-    return rewards;
+  function updateCountdown() {
+    let diff = EXAM_DATE.getTime() - Date.now();
+    if (diff < 0) diff = 0;
+    const total = Math.floor(diff / 1000);
+    const days = Math.floor(total / 86400);
+    const hours = Math.floor((total % 86400) / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const seconds = total % 60;
+    setNum('cdDays', String(days));
+    setNum('cdHours', String(hours).padStart(2, '0'));
+    setNum('cdMinutes', String(minutes).padStart(2, '0'));
+    setNum('cdSeconds', String(seconds).padStart(2, '0'));
   }
 
-  // ===== RENDU =====
-  function renderRewards() {
-    const rewards = generateRewards();
-    const newlyUnlocked = [];
-    rewards.forEach(r => {
-      if (r.condition() && !unlockedRewards.includes(r.id)) {
-        unlockedRewards.push(r.id);
-        newlyUnlocked.push(r);
-        if (user) database.ref('data/unlockedRewards').set(unlockedRewards);
-      }
-    });
-    const validIds = rewards.map(r => r.id);
-    unlockedRewards = unlockedRewards.filter(id => validIds.includes(id));
-    let totalEarned = 0;
-    rewards.forEach(r => { if (unlockedRewards.includes(r.id)) totalEarned += r.amount; });
-    elements.pointsDisplay.textContent = `${totalEarned.toFixed(2)} €`;
-    elements.rewardsList.innerHTML = rewards.map(r => {
-      const unlocked = unlockedRewards.includes(r.id);
-      const badgeClass = unlocked ? 'unlocked' : 'locked';
-      const statusText = unlocked ? '✅ Débloqué' : '🔒 Verrouillé';
-      const statusClass = unlocked ? 'unlocked' : 'locked';
-      return `
-        <div class="reward-item">
-          <div class="reward-badge ${badgeClass}">${r.emoji}</div>
-          <div class="reward-info">
-            <div class="reward-amount">${r.amount.toFixed(2)} €</div>
-            <div class="reward-desc">${r.label}</div>
+  function formatDay(date) {
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  }
+
+  function renderCalendar() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const exam = new Date(EXAM_DATE.getTime());
+    exam.setHours(0, 0, 0, 0);
+
+    if (today.getTime() > exam.getTime()) {
+      elements.calendarList.innerHTML = `
+        <div class="week-item exam">
+          <div class="week-dot"></div>
+          <div class="week-info">
+            <div class="week-name">Examen passé</div>
+            <div class="week-range">Le 5 octobre 2026 · bravo Piso 🎉</div>
           </div>
-          <div class="reward-status ${statusClass}">${statusText}</div>
-        </div>
-      `;
-    }).join('');
-    newlyUnlocked.forEach(r => {
-      showToast(`Félicitations Piso ! Tu as débloqué ${r.amount.toFixed(2)} € (${r.label}) !`);
-    });
+          <div class="week-meta">Terminé</div>
+        </div>`;
+      elements.weekCount.textContent = '—';
+      return;
+    }
+
+    let html = '';
+    let cursor = new Date(today.getTime());
+    let index = 1;
+
+    while (cursor.getTime() <= exam.getTime()) {
+      const start = new Date(cursor.getTime());
+      let end = new Date(cursor.getTime());
+      end.setDate(end.getDate() + 6);
+
+      let isExamWeek = false;
+      if (end.getTime() >= exam.getTime()) {
+        end = new Date(exam.getTime());
+        isExamWeek = true;
+      }
+
+      const isCurrent = index === 1;
+      const dayCount = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+      const name = isExamWeek
+        ? "Semaine de l'examen"
+        : (isCurrent ? "Cette semaine" : `Semaine ${index}`);
+      const meta = isExamWeek ? '🎯 Examen' : `${dayCount} j`;
+
+      html += `
+        <div class="week-item ${isCurrent ? 'current' : ''} ${isExamWeek ? 'exam' : ''}">
+          <div class="week-dot"></div>
+          <div class="week-info">
+            <div class="week-name">${name}</div>
+            <div class="week-range">${formatDay(start)} → ${formatDay(end)}</div>
+          </div>
+          <div class="week-meta">${meta}</div>
+        </div>`;
+
+      cursor = new Date(end.getTime());
+      cursor.setDate(cursor.getDate() + 1);
+      index++;
+    }
+
+    elements.calendarList.innerHTML = html;
+    const total = index - 1;
+    elements.weekCount.textContent = `${total} semaine${total > 1 ? 's' : ''}`;
   }
 
   function renderStats() {
     const total = chapters.length;
-    const done = getDoneCount(chapters);
-    const done2 = getDone2Count(chapters);
+    const done = chapters.filter(ch => ch.done).length;
+    const done2 = chapters.filter(ch => ch.done2).length;
     elements.statTotal.textContent = total;
     elements.statDone.textContent = done;
     elements.statLeft.textContent = total - done;
@@ -1106,9 +1305,10 @@
     const filter = document.querySelector('.filter-tab.active')?.dataset.filter || 'all';
     const search = elements.searchInput.value.toLowerCase().trim();
     let filtered = chapters;
-    if (filter === 'todo') filtered = filtered.filter(ch => !ch.done);
-    else if (filter === 'done') filtered = filtered.filter(ch => ch.done);
-    else if (filter === 'toread') filtered = filtered.filter(ch => !ch.done2);
+
+    if (filter === 'toread') filtered = filtered.filter(ch => !ch.done2);
+    else if (filter === 'read') filtered = filtered.filter(ch => ch.done2);
+
     if (search) {
       filtered = filtered.filter(ch => {
         const name = ch.name ? ch.name.toLowerCase() : '';
@@ -1116,12 +1316,14 @@
         return name.includes(search) || theme.includes(search);
       });
     }
+
     const groups = {};
     filtered.forEach(ch => {
       const theme = ch.theme || 'Sans thème';
       if (!groups[theme]) groups[theme] = [];
       groups[theme].push(ch);
     });
+
     let html = '';
     for (const [theme, items] of Object.entries(groups)) {
       const doneCount = items.filter(i => i.done).length;
@@ -1139,6 +1341,7 @@
         'Traumatologie': '#16A085'
       };
       if (colorMap[theme]) dotColor = colorMap[theme];
+
       html += `
         <div class="theme-section">
           <div class="theme-header">
@@ -1147,8 +1350,8 @@
             <span class="theme-badge">✅ ${doneCount}/${totalCount}</span>
             <span class="theme-badge badge-2">🔁 ${done2Count}/${totalCount}</span>
           </div>
-          <div class="theme-card">
-      `;
+          <div class="theme-card">`;
+
       items.forEach(ch => {
         const doneClass = ch.done ? 'is-done' : '';
         const nameClass = ch.done ? 'done' : '';
@@ -1165,17 +1368,18 @@
               <button class="btn-icon edit" data-key="${ch.key}" title="Modifier">✏️</button>
               <button class="btn-icon del" data-key="${ch.key}" title="Supprimer">🗑️</button>
             </div>
-          </div>
-        `;
+          </div>`;
       });
+
       html += `</div></div>`;
     }
+
     elements.chapterList.innerHTML = html || `
       <div class="empty" style="text-align:center;padding:30px 10px;color:var(--muted);">
         <div style="font-size:2rem;margin-bottom:8px;">📭</div>
         <p style="font-size:0.85rem;">Aucun chapitre trouvé</p>
-      </div>
-    `;
+      </div>`;
+
     attachChapterEvents();
   }
 
@@ -1188,41 +1392,45 @@
           <div class="theme-list-actions">
             <button class="btn-icon del" data-theme="${theme}" title="Supprimer le thème">🗑️</button>
           </div>
-        </div>
-      `;
+        </div>`;
     });
-    elements.themeListContainer.innerHTML = html || `<div style="font-size:0.8rem; color:var(--muted); text-align:center;">Aucun thème personnalisé.</div>`;
-    document.querySelectorAll('.theme-list-actions .btn-icon.del').forEach(btn => {
+
+    elements.themeListContainer.innerHTML = html ||
+      `<div style="font-size:0.8rem; color:var(--muted); text-align:center;">Aucun thème personnalisé.</div>`;
+
+    elements.themeListContainer.querySelectorAll('.btn-icon.del').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         deleteTheme(btn.dataset.theme);
       });
     });
+
     elements.themeListDatalist.innerHTML = themes.map(t => `<option value="${t}" />`).join('');
   }
 
   function attachChapterEvents() {
-    document.querySelectorAll('.custom-cb').forEach(el => {
-      el.addEventListener('click', function(e) {
+    elements.chapterList.querySelectorAll('.custom-cb').forEach(el => {
+      el.addEventListener('click', function (e) {
         e.stopPropagation();
         toggleChapterField(this.dataset.key, this.dataset.field);
       });
     });
-    document.querySelectorAll('.btn-icon.del').forEach(el => {
-      el.addEventListener('click', function(e) {
+
+    elements.chapterList.querySelectorAll('.btn-icon.del').forEach(el => {
+      el.addEventListener('click', function (e) {
         e.stopPropagation();
         if (confirm('Supprimer ce chapitre ?')) deleteChapter(this.dataset.key);
       });
     });
-    document.querySelectorAll('.btn-icon.edit').forEach(el => {
-      el.addEventListener('click', function(e) {
+
+    elements.chapterList.querySelectorAll('.btn-icon.edit').forEach(el => {
+      el.addEventListener('click', function (e) {
         e.stopPropagation();
         editChapter(this.dataset.key);
       });
     });
   }
 
-  // ===== FONCTIONS MÉTIER =====
   function toggleChapterField(key, field) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
     const chapter = chapters.find(ch => ch.key === key);
@@ -1234,7 +1442,6 @@
 
   function deleteChapter(key) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
-    if (!confirm('Supprimer ce chapitre ?')) return;
     database.ref('data/' + key).remove();
   }
 
@@ -1242,34 +1449,40 @@
     if (!user) { showToast('Veuillez vous connecter.'); return; }
     const chapter = chapters.find(ch => ch.key === key);
     if (!chapter) return;
+
     const newName = prompt('Nouveau nom :', chapter.name);
     if (newName === null) return;
     const trimmedName = newName.trim();
-    if (!trimmedName) return alert('Le nom ne peut pas être vide.');
+    if (!trimmedName) { alert('Le nom ne peut pas être vide.'); return; }
+
     const newTheme = prompt('Nouveau thème :', chapter.theme);
     if (newTheme === null) return;
     const trimmedTheme = newTheme.trim();
-    if (!trimmedTheme) return alert('Le thème ne peut pas être vide.');
+    if (!trimmedTheme) { alert('Le thème ne peut pas être vide.'); return; }
+
     if (!themes.includes(trimmedTheme)) {
       themes.push(trimmedTheme);
       database.ref('data/themes').set(themes);
       renderThemeManager();
     }
+
     database.ref('data/' + key).update({ name: trimmedName, theme: trimmedTheme });
   }
 
   function addChapter(name, theme) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
-    if (!name.trim() || !theme.trim()) return alert('Veuillez remplir tous les champs.');
+    if (!name.trim() || !theme.trim()) { alert('Veuillez remplir tous les champs.'); return; }
+
     const trimmedTheme = theme.trim();
     if (!themes.includes(trimmedTheme)) {
       themes.push(trimmedTheme);
       database.ref('data/themes').set(themes);
       renderThemeManager();
     }
+
     const newRef = database.ref('data').push();
-    const newChapter = { name: name.trim(), theme: trimmedTheme, done: false, done2: false };
-    newRef.set(newChapter);
+    newRef.set({ name: name.trim(), theme: trimmedTheme, done: false, done2: false });
+
     elements.chapterName.value = '';
     elements.chapterTheme.value = '';
     elements.addForm.classList.remove('open');
@@ -1285,43 +1498,38 @@
     database.ref('data/themes').set(themes);
     elements.newThemeName.value = '';
     renderThemeManager();
-    renderRewards();
     showToast(`Thème "${trimmed}" ajouté.`);
   }
 
   function deleteTheme(theme) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
-    if (!confirm(`Supprimer le thème "${theme}" ? Les chapitres associés ne seront pas effacés, mais la récompense disparaîtra.`)) return;
+    if (!confirm(`Supprimer le thème "${theme}" ?`)) return;
     themes = themes.filter(t => t !== theme);
     database.ref('data/themes').set(themes);
     renderThemeManager();
-    renderRewards();
   }
 
-  // ===== GESTION AUTHENTIFICATION =====
   function updateAuthUI() {
-    const status = elements.authStatus;
-    const logoutBtn = elements.logoutBtn;
-    const overlay = elements.loginOverlay;
-
     if (user) {
-      status.textContent = 'Connecté';
-      logoutBtn.style.display = 'inline-block';
-      overlay.classList.remove('login-overlay--visible');
+      elements.authStatus.textContent = 'Connecté';
+      elements.logoutBtn.style.display = 'inline-block';
+      elements.loginOverlay.classList.remove('login-overlay--visible');
 
       if (!dataListener) {
         dataListener = database.ref('data').on('value', (snapshot) => {
           const data = snapshot.val() || {};
-          const chapterKeys = Object.keys(data).filter(key => !['themes', 'unlockedRewards'].includes(key));
+          const chapterKeys = Object.keys(data).filter(key => key !== 'themes');
           chapters = chapterKeys.map(key => ({ key, ...data[key] }));
           themes = data.themes || [];
+
           const chapterThemes = [...new Set(chapters.map(ch => ch.theme))];
           let needUpdate = false;
-          chapterThemes.forEach(ct => { if (ct && !themes.includes(ct)) { themes.push(ct); needUpdate = true; } });
+          chapterThemes.forEach(ct => {
+            if (ct && !themes.includes(ct)) { themes.push(ct); needUpdate = true; }
+          });
           if (needUpdate) database.ref('data/themes').set(themes);
-          unlockedRewards = data.unlockedRewards || [];
+
           renderStats();
-          renderRewards();
           renderList();
           renderThemeManager();
         }, (error) => {
@@ -1330,26 +1538,24 @@
         });
       }
     } else {
-      status.textContent = 'Déconnecté';
-      logoutBtn.style.display = 'none';
-      overlay.classList.add('login-overlay--visible');
+      elements.authStatus.textContent = 'Déconnecté';
+      elements.logoutBtn.style.display = 'none';
+      elements.loginOverlay.classList.add('login-overlay--visible');
 
       if (dataListener) {
         database.ref('data').off('value', dataListener);
         dataListener = null;
       }
+
       chapters = [];
       themes = [];
-      unlockedRewards = [];
       renderStats();
-      renderRewards();
       renderList();
       renderThemeManager();
     }
   }
 
-  // ===== ÉVÉNEMENTS UI =====
-  elements.loginBtn.addEventListener('click', async function() {
+  elements.loginBtn.addEventListener('click', async function () {
     const email = elements.loginEmail.value.trim();
     const password = elements.loginPassword.value;
     const errorEl = elements.loginError;
@@ -1370,7 +1576,7 @@
     }
   });
 
-  elements.logoutBtn.addEventListener('click', async function() {
+  elements.logoutBtn.addEventListener('click', async function () {
     await auth.signOut();
   });
 
@@ -1386,9 +1592,11 @@
     elements.addForm.classList.toggle('open');
     elements.addToggle.classList.toggle('open');
   });
+
   elements.addChapterBtn.addEventListener('click', () => {
     addChapter(elements.chapterName.value, elements.chapterTheme.value);
   });
+
   elements.chapterName.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.addChapterBtn.click(); });
   elements.chapterTheme.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.addChapterBtn.click(); });
 
@@ -1396,9 +1604,11 @@
     elements.themeForm.classList.toggle('open');
     elements.themeToggle.classList.toggle('open');
   });
+
   elements.addThemeBtn.addEventListener('click', () => {
     addTheme(elements.newThemeName.value);
   });
+
   elements.newThemeName.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.addThemeBtn.click(); });
 
   elements.filterTabs.forEach(tab => {
@@ -1408,16 +1618,17 @@
       renderList();
     });
   });
+
   elements.searchInput.addEventListener('input', renderList);
 
-  // ===== INITIALISATION =====
-  function displayDailyMessage() {
-    const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 0);
-    const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
-    document.getElementById('dailyMessageText').textContent = APOLOGY_MESSAGES[dayOfYear % APOLOGY_MESSAGES.length];
-  }
-  displayDailyMessage();
+  displayEncouragement();
+  setInterval(displayEncouragement, 60000);
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+  renderCalendar();
+  renderStats();
+  renderList();
+  renderThemeManager();
 </script>
 
 </body>
