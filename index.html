@@ -144,162 +144,34 @@
       word-break: break-word;
     }
 
-    .countdown-card {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(160deg, #FFF7F9 0%, #F6F8FF 55%, #F1FAF5 100%);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px 12px 14px;
-      margin-bottom: 14px;
-      text-align: center;
-      box-shadow: var(--shadow);
-      isolation: isolate;
-    }
-
-    .countdown-card::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 46%;
-      width: 230px;
-      height: 230px;
-      margin: -115px 0 0 -115px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(240, 160, 176, 0.30), rgba(240, 160, 176, 0) 70%);
-      animation: breathe 10s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @keyframes breathe {
-      0%, 100% { transform: scale(0.88); opacity: 0.5; }
-      50% { transform: scale(1.28); opacity: 0.9; }
-    }
-
-    .ripple-field {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .ripple {
-      position: absolute;
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(212, 120, 138, 0.28);
-      animation: ripple 12s cubic-bezier(0.25, 0.6, 0.35, 1) infinite;
-    }
-
-    .ripple:nth-child(2) { animation-delay: 4s; }
-    .ripple:nth-child(3) { animation-delay: 8s; }
-
-    @keyframes ripple {
-      0% { transform: scale(0.5); opacity: 0; }
-      18% { opacity: 0.65; }
-      100% { transform: scale(3.2); opacity: 0; }
-    }
-
-    .countdown-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .countdown-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .countdown-grid {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin: 10px 0 8px;
-    }
-
-    .cd-cell {
-      flex: 1 1 0;
-      max-width: 92px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(232, 213, 196, 0.9);
-      border-radius: 14px;
-      padding: 8px 2px 6px;
-    }
-
-    .cd-num {
-      display: block;
-      font-size: 1.55rem;
-      font-weight: 800;
-      color: var(--navy);
-      line-height: 1.05;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .cd-num.tick {
-      animation: softTick 0.9s ease-out;
-    }
-
-    @keyframes softTick {
-      0% { opacity: 0.35; transform: translateY(2px) scale(0.97); }
-      100% { opacity: 1; transform: none; }
-    }
-
-    .cd-lab {
-      display: block;
-      font-size: 0.56rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .countdown-hint {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
-    .countdown-hint strong {
-      color: var(--navy);
-    }
-
-    .calendar-card {
+    .day-grid-card {
       background: var(--card-bg);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+      padding: 14px 14px 16px;
       margin-bottom: 14px;
-      overflow: hidden;
     }
 
-    .calendar-head {
+    .day-grid-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-bottom: 10px;
       gap: 8px;
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(200, 180, 160, 0.15);
+      flex-wrap: wrap;
     }
 
-    .calendar-title {
+    .day-grid-title {
       font-weight: 800;
       color: var(--navy);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       word-break: break-word;
     }
 
-    .calendar-count {
+    .day-grid-count {
       background: var(--navy);
       color: white;
       border-radius: 50px;
@@ -307,85 +179,70 @@
       font-weight: 700;
       padding: 3px 10px;
       white-space: nowrap;
-      flex-shrink: 0;
     }
 
-    .calendar-list {
-      max-height: 292px;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+    .day-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+      gap: 6px;
     }
 
-    .week-item {
+    .day-cell {
+      aspect-ratio: 1;
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 9px 14px;
-      border-bottom: 1px solid rgba(200, 180, 160, 0.12);
-    }
-
-    .week-item:last-child {
-      border-bottom: none;
-    }
-
-    .week-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--border);
-      flex-shrink: 0;
-    }
-
-    .week-item.current .week-dot {
-      background: var(--coral);
-      box-shadow: 0 0 0 4px rgba(224, 90, 90, 0.14);
-    }
-
-    .week-item.exam {
-      background: rgba(212, 120, 138, 0.06);
-    }
-
-    .week-item.exam .week-dot {
-      background: var(--navy);
-      box-shadow: 0 0 0 4px rgba(212, 120, 138, 0.16);
-    }
-
-    .week-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .week-name {
+      justify-content: center;
+      border-radius: 10px;
       font-weight: 700;
-      font-size: 0.86rem;
-      color: var(--text);
-      word-break: break-word;
-    }
-
-    .week-range {
-      font-size: 0.72rem;
+      font-size: 0.82rem;
+      background: white;
+      border: 1.5px solid var(--border);
       color: var(--muted);
+      transition: transform 0.2s;
+      font-variant-numeric: tabular-nums;
     }
 
-    .week-meta {
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: var(--muted);
-      white-space: nowrap;
-      background: #f4efe9;
-      border-radius: 50px;
-      padding: 3px 10px;
-      flex-shrink: 0;
+    .day-cell.past {
+      background: linear-gradient(135deg, #FFE7EE, #FFD5E0);
+      border-color: transparent;
+      color: var(--navy);
     }
 
-    .week-item.current .week-meta {
-      background: rgba(224, 90, 90, 0.12);
-      color: var(--coral);
-    }
-
-    .week-item.exam .week-meta {
-      background: var(--navy);
+    .day-cell.today {
+      background: linear-gradient(135deg, var(--navy), var(--coral2));
       color: white;
+      border-color: transparent;
+      animation: todayGlow 2.6s ease-in-out infinite;
+    }
+
+    .day-cell.exam {
+      background: linear-gradient(135deg, var(--coral), #B8476E);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 0 0 3px rgba(224, 90, 90, 0.22);
+    }
+
+    .day-cell.exam.today {
+      animation: todayGlowExam 2.6s ease-in-out infinite;
+    }
+
+    @keyframes todayGlow {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(212, 120, 138, 0.15); }
+      50% { box-shadow: 0 0 0 7px rgba(212, 120, 138, 0.28); }
+    }
+
+    @keyframes todayGlowExam {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(224, 90, 90, 0.2); }
+      50% { box-shadow: 0 0 0 7px rgba(224, 90, 90, 0.35); }
+    }
+
+    .day-grid-done {
+      text-align: center;
+      padding: 24px 10px;
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
 
     .stats-row {
@@ -405,9 +262,7 @@
       transition: transform 0.2s;
     }
 
-    .stat-card:active {
-      transform: scale(0.96);
-    }
+    .stat-card:active { transform: scale(0.96); }
 
     .stat-num {
       font-size: 2.1rem;
@@ -947,8 +802,6 @@
       .header h1 { font-size: 1.6rem; }
       .stat-num { font-size: 1.7rem; }
       .stat-label { font-size: 0.6rem; }
-      .cd-num { font-size: 1.35rem; }
-      .cd-lab { font-size: 0.52rem; }
       .chapter-name { font-size: 0.85rem; }
       .filter-tab { font-size: 0.68rem; padding: 6px 10px; }
       .btn-add { font-size: 0.9rem; }
@@ -956,7 +809,9 @@
       .toast { font-size: 0.85rem; padding: 10px 16px; }
       .payment-engagement { font-size: 0.78rem; padding: 12px 10px; }
       .login-box { padding: 1.5rem; }
-      .calendar-title { font-size: 0.8rem; }
+      .day-grid { grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 5px; }
+      .day-cell { font-size: 0.75rem; border-radius: 8px; }
+      .day-grid-title { font-size: 0.78rem; }
     }
 
     @media (max-width: 360px) {
@@ -971,9 +826,9 @@
       .btn-icon { width: 36px; height: 36px; font-size: 0.9rem; }
       .theme-title { font-size: 0.85rem; }
       .theme-badge { font-size: 0.6rem; padding: 2px 8px; }
-      .cd-num { font-size: 1.15rem; }
-      .cd-lab { font-size: 0.48rem; }
       .payment-engagement { font-size: 0.72rem; padding: 10px 8px; }
+      .day-grid { grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 4px; }
+      .day-cell { font-size: 0.68rem; border-radius: 7px; }
     }
   </style>
 </head>
@@ -1011,22 +866,12 @@
     <p id="dailyMessageText"></p>
   </div>
 
-  <div class="countdown-card">
-    <div class="ripple-field">
-      <span class="ripple"></span>
-      <span class="ripple"></span>
-      <span class="ripple"></span>
+  <div class="day-grid-card">
+    <div class="day-grid-head">
+      <span class="day-grid-title">🌿 Jours jusqu'à l'examen</span>
+      <span class="day-grid-count" id="dayGridCount">—</span>
     </div>
-    <div class="countdown-inner">
-      <div class="countdown-label">Le chemin jusqu'à l'examen</div>
-      <div class="countdown-grid">
-        <div class="cd-cell"><span class="cd-num" id="cdDays">0</span><span class="cd-lab">Jours</span></div>
-        <div class="cd-cell"><span class="cd-num" id="cdHours">00</span><span class="cd-lab">Heures</span></div>
-        <div class="cd-cell"><span class="cd-num" id="cdMinutes">00</span><span class="cd-lab">Minutes</span></div>
-        <div class="cd-cell"><span class="cd-num" id="cdSeconds">00</span><span class="cd-lab">Secondes</span></div>
-      </div>
-      <div class="countdown-hint">Examen le <strong>5 octobre 2026</strong> · respire, tout va bien 🌿</div>
-    </div>
+    <div class="day-grid" id="dayGrid"></div>
   </div>
 
   <div class="stats-row">
@@ -1034,14 +879,6 @@
     <div class="stat-card done"><div class="stat-num" id="statDone">0</div><div class="stat-label">Révisés</div></div>
     <div class="stat-card left"><div class="stat-num" id="statLeft">0</div><div class="stat-label">Restants</div></div>
     <div class="stat-card reread"><div class="stat-num" id="statRead2">0</div><div class="stat-label">Relus</div></div>
-  </div>
-
-  <div class="calendar-card">
-    <div class="calendar-head">
-      <span class="calendar-title">📅 Calendrier des semaines</span>
-      <span class="calendar-count" id="weekCount">—</span>
-    </div>
-    <div class="calendar-list" id="calendarList"></div>
   </div>
 
   <div class="add-card">
@@ -1152,6 +989,7 @@
   let themes = [];
   let user = null;
   let dataListener = null;
+  let lastGridDayKey = '';
 
   const $ = (id) => document.getElementById(id);
   const elements = {
@@ -1181,8 +1019,8 @@
     loginError: $('loginError'),
     authStatus: $('authStatus'),
     logoutBtn: $('logoutBtn'),
-    calendarList: $('calendarList'),
-    weekCount: $('weekCount'),
+    dayGrid: $('dayGrid'),
+    dayGridCount: $('dayGridCount'),
     dailyMessageIcon: $('dailyMessageIcon'),
     dailyMessageText: $('dailyMessageText')
   };
@@ -1202,93 +1040,45 @@
     elements.dailyMessageText.textContent = item.t;
   }
 
-  function setNum(id, value) {
-    const el = document.getElementById(id);
-    if (!el || el.textContent === value) return;
-    el.textContent = value;
-    el.classList.remove('tick');
-    void el.offsetWidth;
-    el.classList.add('tick');
+  function dateKey(d) {
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
   }
 
-  function updateCountdown() {
-    let diff = EXAM_DATE.getTime() - Date.now();
-    if (diff < 0) diff = 0;
-    const total = Math.floor(diff / 1000);
-    const days = Math.floor(total / 86400);
-    const hours = Math.floor((total % 86400) / 3600);
-    const minutes = Math.floor((total % 3600) / 60);
-    const seconds = total % 60;
-    setNum('cdDays', String(days));
-    setNum('cdHours', String(hours).padStart(2, '0'));
-    setNum('cdMinutes', String(minutes).padStart(2, '0'));
-    setNum('cdSeconds', String(seconds).padStart(2, '0'));
-  }
+  function renderDayGrid() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const exam = new Date(EXAM_DATE.getFullYear(), EXAM_DATE.getMonth(), EXAM_DATE.getDate());
 
-  function formatDay(date) {
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-  }
-
-  function renderCalendar() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const exam = new Date(EXAM_DATE.getTime());
-    exam.setHours(0, 0, 0, 0);
+    lastGridDayKey = dateKey(today);
 
     if (today.getTime() > exam.getTime()) {
-      elements.calendarList.innerHTML = `
-        <div class="week-item exam">
-          <div class="week-dot"></div>
-          <div class="week-info">
-            <div class="week-name">Examen passé</div>
-            <div class="week-range">Le 5 octobre 2026 · bravo Piso 🎉</div>
-          </div>
-          <div class="week-meta">Terminé</div>
-        </div>`;
-      elements.weekCount.textContent = '—';
+      elements.dayGrid.innerHTML = '<div class="day-grid-done">🎉 L\'examen est passé, bravo Piso !</div>';
+      elements.dayGridCount.textContent = 'Terminé';
       return;
     }
 
-    let html = '';
-    let cursor = new Date(today.getTime());
-    let index = 1;
-
-    while (cursor.getTime() <= exam.getTime()) {
-      const start = new Date(cursor.getTime());
-      let end = new Date(cursor.getTime());
-      end.setDate(end.getDate() + 6);
-
-      let isExamWeek = false;
-      if (end.getTime() >= exam.getTime()) {
-        end = new Date(exam.getTime());
-        isExamWeek = true;
-      }
-
-      const isCurrent = index === 1;
-      const dayCount = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
-      const name = isExamWeek
-        ? "Semaine de l'examen"
-        : (isCurrent ? "Cette semaine" : `Semaine ${index}`);
-      const meta = isExamWeek ? '🎯 Examen' : `${dayCount} j`;
-
-      html += `
-        <div class="week-item ${isCurrent ? 'current' : ''} ${isExamWeek ? 'exam' : ''}">
-          <div class="week-dot"></div>
-          <div class="week-info">
-            <div class="week-name">${name}</div>
-            <div class="week-range">${formatDay(start)} → ${formatDay(end)}</div>
-          </div>
-          <div class="week-meta">${meta}</div>
-        </div>`;
-
-      cursor = new Date(end.getTime());
-      cursor.setDate(cursor.getDate() + 1);
-      index++;
+    let start = new Date(today.getFullYear(), today.getMonth(), 1);
+    const totalFromStart = Math.round((exam.getTime() - start.getTime()) / 86400000) + 1;
+    if (totalFromStart < 14) {
+      start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     }
 
-    elements.calendarList.innerHTML = html;
-    const total = index - 1;
-    elements.weekCount.textContent = `${total} semaine${total > 1 ? 's' : ''}`;
+    let html = '';
+    const cursor = new Date(start.getTime());
+    while (cursor.getTime() <= exam.getTime()) {
+      const t = cursor.getTime();
+      let cls = 'day-cell';
+      if (t < today.getTime()) cls += ' past';
+      else if (t === today.getTime()) cls += ' today';
+      if (t === exam.getTime()) cls += ' exam';
+      html += '<div class="' + cls + '">' + cursor.getDate() + '</div>';
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    elements.dayGrid.innerHTML = html;
+
+    const daysLeft = Math.round((exam.getTime() - today.getTime()) / 86400000) + 1;
+    elements.dayGridCount.textContent = daysLeft + (daysLeft > 1 ? ' jours' : ' jour');
   }
 
   function renderStats() {
@@ -1623,9 +1413,14 @@
 
   displayEncouragement();
   setInterval(displayEncouragement, 60000);
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
-  renderCalendar();
+
+  renderDayGrid();
+  setInterval(() => {
+    const now = new Date();
+    const key = dateKey(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+    if (key !== lastGridDayKey) renderDayGrid();
+  }, 60000);
+
   renderStats();
   renderList();
   renderThemeManager();
