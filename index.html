@@ -962,6 +962,7 @@
 
   const EXAM_DATE = new Date(2026, 9, 5, 0, 0, 0);
   const HALF_DAY_MS = 12 * 60 * 60 * 1000;
+  const MAX_GRID_DAYS = 62; // cap pour éviter une grille géante
 
   const ENCOURAGEMENTS = [
     { i: "🌿", t: "Tu avances, un chapitre à la fois. Doucement mais sûrement." },
@@ -1030,6 +1031,18 @@
     dailyMessageText: $('dailyMessageText')
   };
 
+  // ---- Utilitaires ----
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[c]));
+  }
+
   function showToast(message) {
     const toast = elements.toast;
     toast.textContent = message;
@@ -1049,6 +1062,8 @@
     return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
   }
 
+  // ---- Grille des jours ----
+
   function renderDayGrid() {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -1062,15 +1077,25 @@
       return;
     }
 
+    // Déterminer la plage à afficher, sans jamais dépasser MAX_GRID_DAYS cellules
     let start = new Date(today.getFullYear(), today.getMonth(), 1);
-    const totalFromStart = Math.round((exam.getTime() - start.getTime()) / 86400000) + 1;
-    if (totalFromStart < 14) {
+    const daysFromStart = Math.round((exam.getTime() - start.getTime()) / 86400000) + 1;
+
+    let end;
+    if (daysFromStart < 14) {
+      // Examen imminent : reculer d'un mois pour donner du contexte
       start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      end = exam;
+    } else if (daysFromStart <= MAX_GRID_DAYS) {
+      end = exam;
+    } else {
+      // Examen lointain : n'afficher que le mois courant
+      end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     }
 
     let html = '';
     const cursor = new Date(start.getTime());
-    while (cursor.getTime() <= exam.getTime()) {
+    while (cursor.getTime() <= end.getTime()) {
       const t = cursor.getTime();
       let cls = 'day-cell';
       if (t < today.getTime()) cls += ' past';
@@ -1086,82 +1111,97 @@
     elements.dayGridCount.textContent = daysLeft + (daysLeft > 1 ? ' jours' : ' jour');
   }
 
+  // ---- Statistiques globales ----
+
   function renderStats() {
     const total = chapters.length;
-    const done = chapters.filter(ch => ch.done).length;
-    const done2 = chapters.filter(ch => ch.done2).length;
+    const done = chapters.filter((ch) => ch.done).length;
+    const done2 = chapters.filter((ch) => ch.done2).length;
     elements.statTotal.textContent = total;
     elements.statDone.textContent = done;
     elements.statLeft.textContent = total - done;
     elements.statRead2.textContent = done2;
   }
 
+  // ---- Liste des chapitres ----
+
   function renderList() {
     const filter = document.querySelector('.filter-tab.active')?.dataset.filter || 'all';
     const search = elements.searchInput.value.toLowerCase().trim();
-    let filtered = chapters;
 
-    if (filter === 'toread') filtered = filtered.filter(ch => !ch.done2);
-    else if (filter === 'read') filtered = filtered.filter(ch => ch.done2);
+    // 1) On filtre la liste affichée
+    let filtered = chapters;
+    if (filter === 'toread') filtered = filtered.filter((ch) => !ch.done2);
+    else if (filter === 'read') filtered = filtered.filter((ch) => ch.done2);
 
     if (search) {
-      filtered = filtered.filter(ch => {
+      filtered = filtered.filter((ch) => {
         const name = ch.name ? ch.name.toLowerCase() : '';
         const theme = ch.theme ? ch.theme.toLowerCase() : '';
         return name.includes(search) || theme.includes(search);
       });
     }
 
+    // 2) On regroupe les chapitres filtrés par thème
     const groups = {};
-    filtered.forEach(ch => {
+    filtered.forEach((ch) => {
       const theme = ch.theme || 'Sans thème';
       if (!groups[theme]) groups[theme] = [];
       groups[theme].push(ch);
     });
 
+    const colorMap = {
+      'Cardiologie': '#E05A5A',
+      'Dermatologie': '#C4607A',
+      'Maladie infectieuse': '#F0A0B0',
+      'Neurologie': '#4CAF82',
+      'Pneumologie': '#E67E22',
+      'Psychiatrie': '#8E44AD',
+      'Rhumatologie': '#C0392B',
+      'Traumatologie': '#16A085'
+    };
+
     let html = '';
     for (const [theme, items] of Object.entries(groups)) {
-      const doneCount = items.filter(i => i.done).length;
-      const done2Count = items.filter(i => i.done2).length;
-      const totalCount = items.length;
-      let dotColor = '#D4788A';
-      const colorMap = {
-        'Cardiologie': '#E05A5A',
-        'Dermatologie': '#C4607A',
-        'Maladie infectieuse': '#F0A0B0',
-        'Neurologie': '#4CAF82',
-        'Pneumologie': '#E67E22',
-        'Psychiatrie': '#8E44AD',
-        'Rhumatologie': '#C0392B',
-        'Traumatologie': '#16A085'
-      };
-      if (colorMap[theme]) dotColor = colorMap[theme];
+      // 3) IMPORTANT : les quotas sont calculés sur l'ENSEMBLE des chapitres
+      //    du thème, pas sur la liste filtrée. Sinon les deux badges
+      //    affichent N/N dès qu'on filtre sur "Relus".
+      const themeAll = chapters.filter((ch) => (ch.theme || 'Sans thème') === theme);
+      const doneCount = themeAll.filter((i) => i.done).length;
+      const done2Count = themeAll.filter((i) => i.done2).length;
+      const totalCount = themeAll.length;
+
+      const dotColor = colorMap[theme] || '#D4788A';
+      const safeTheme = escapeHtml(theme);
 
       html += `
         <div class="theme-section">
           <div class="theme-header">
             <div class="theme-dot" style="background:${dotColor}"></div>
-            <span class="theme-title">${theme}</span>
+            <span class="theme-title">${safeTheme}</span>
             <span class="theme-badge">✅ ${doneCount}/${totalCount}</span>
             <span class="theme-badge badge-2">🔁 ${done2Count}/${totalCount}</span>
           </div>
           <div class="theme-card">`;
 
-      items.forEach(ch => {
+      items.forEach((ch) => {
         const doneClass = ch.done ? 'is-done' : '';
         const nameClass = ch.done ? 'done' : '';
         const cb1Class = ch.done ? 'checked' : '';
         const cb2Class = ch.done2 ? 'checked' : '';
+        const safeName = escapeHtml(ch.name || 'Sans nom');
+        const safeKey = escapeHtml(ch.key);
+
         html += `
-          <div class="chapter-item ${doneClass}" data-key="${ch.key}">
+          <div class="chapter-item ${doneClass}" data-key="${safeKey}">
             <div class="cb-group">
-              <div class="custom-cb cb1 ${cb1Class}" data-key="${ch.key}" data-field="done" title="1ère révision"></div>
-              <div class="custom-cb cb2 ${cb2Class}" data-key="${ch.key}" data-field="done2" title="2ème relecture"></div>
+              <div class="custom-cb cb1 ${cb1Class}" data-key="${safeKey}" data-field="done" title="1ère révision"></div>
+              <div class="custom-cb cb2 ${cb2Class}" data-key="${safeKey}" data-field="done2" title="2ème relecture"></div>
             </div>
-            <span class="chapter-name ${nameClass}">${ch.name || 'Sans nom'}</span>
+            <span class="chapter-name ${nameClass}">${safeName}</span>
             <div class="btn-actions">
-              <button class="btn-icon edit" data-key="${ch.key}" title="Modifier">✏️</button>
-              <button class="btn-icon del" data-key="${ch.key}" title="Supprimer">🗑️</button>
+              <button class="btn-icon edit" data-key="${safeKey}" title="Modifier">✏️</button>
+              <button class="btn-icon del" data-key="${safeKey}" title="Supprimer">🗑️</button>
             </div>
           </div>`;
       });
@@ -1178,14 +1218,17 @@
     attachChapterEvents();
   }
 
+  // ---- Gestion des thèmes ----
+
   function renderThemeManager() {
     let html = '';
-    themes.forEach(theme => {
+    themes.forEach((theme) => {
+      const safe = escapeHtml(theme);
       html += `
         <div class="theme-list-item">
-          <span class="theme-list-name">${theme}</span>
+          <span class="theme-list-name">${safe}</span>
           <div class="theme-list-actions">
-            <button class="btn-icon del" data-theme="${theme}" title="Supprimer le thème">🗑️</button>
+            <button class="btn-icon del" data-theme="${safe}" title="Supprimer le thème">🗑️</button>
           </div>
         </div>`;
     });
@@ -1193,32 +1236,36 @@
     elements.themeListContainer.innerHTML = html ||
       `<div style="font-size:0.8rem; color:var(--muted); text-align:center;">Aucun thème personnalisé.</div>`;
 
-    elements.themeListContainer.querySelectorAll('.btn-icon.del').forEach(btn => {
+    elements.themeListContainer.querySelectorAll('.btn-icon.del').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         deleteTheme(btn.dataset.theme);
       });
     });
 
-    elements.themeListDatalist.innerHTML = themes.map(t => `<option value="${t}" />`).join('');
+    elements.themeListDatalist.innerHTML = themes
+      .map((t) => `<option value="${escapeHtml(t)}" />`)
+      .join('');
   }
 
+  // ---- Événements des chapitres ----
+
   function attachChapterEvents() {
-    elements.chapterList.querySelectorAll('.custom-cb').forEach(el => {
+    elements.chapterList.querySelectorAll('.custom-cb').forEach((el) => {
       el.addEventListener('click', function (e) {
         e.stopPropagation();
         toggleChapterField(this.dataset.key, this.dataset.field);
       });
     });
 
-    elements.chapterList.querySelectorAll('.btn-icon.del').forEach(el => {
+    elements.chapterList.querySelectorAll('.btn-icon.del').forEach((el) => {
       el.addEventListener('click', function (e) {
         e.stopPropagation();
         if (confirm('Supprimer ce chapitre ?')) deleteChapter(this.dataset.key);
       });
     });
 
-    elements.chapterList.querySelectorAll('.btn-icon.edit').forEach(el => {
+    elements.chapterList.querySelectorAll('.btn-icon.edit').forEach((el) => {
       el.addEventListener('click', function (e) {
         e.stopPropagation();
         editChapter(this.dataset.key);
@@ -1228,11 +1275,18 @@
 
   function toggleChapterField(key, field) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
-    const chapter = chapters.find(ch => ch.key === key);
+    const chapter = chapters.find((ch) => ch.key === key);
     if (!chapter) return;
+
     const newVal = !chapter[field];
-    chapter[field] = newVal;
-    database.ref('data/' + key).update({ [field]: newVal });
+    const updates = { [field]: newVal };
+
+    // Cohérence : un chapitre "relu" est forcément "révisé".
+    // Inversement, si on annule la 1ère révision, la relecture tombe aussi.
+    if (field === 'done2' && newVal) updates.done = true;
+    if (field === 'done' && !newVal) updates.done2 = false;
+
+    database.ref('data/' + key).update(updates);
   }
 
   function deleteChapter(key) {
@@ -1242,7 +1296,7 @@
 
   function editChapter(key) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
-    const chapter = chapters.find(ch => ch.key === key);
+    const chapter = chapters.find((ch) => ch.key === key);
     if (!chapter) return;
 
     const newName = prompt('Nouveau nom :', chapter.name);
@@ -1276,7 +1330,12 @@
     }
 
     const newRef = database.ref('data').push();
-    newRef.set({ name: name.trim(), theme: trimmedTheme, done: false, done2: false });
+    newRef.set({
+      name: name.trim(),
+      theme: trimmedTheme,
+      done: false,
+      done2: false
+    });
 
     elements.chapterName.value = '';
     elements.chapterTheme.value = '';
@@ -1293,16 +1352,18 @@
     database.ref('data/themes').set(themes);
     elements.newThemeName.value = '';
     renderThemeManager();
-    showToast(`Thème "${trimmed}" ajouté.`);
+    showToast('Thème "' + trimmed + '" ajouté.');
   }
 
   function deleteTheme(theme) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
-    if (!confirm(`Supprimer le thème "${theme}" ?`)) return;
-    themes = themes.filter(t => t !== theme);
+    if (!confirm('Supprimer le thème "' + theme + '" ?')) return;
+    themes = themes.filter((t) => t !== theme);
     database.ref('data/themes').set(themes);
     renderThemeManager();
   }
+
+  // ---- Auth / chargement des données ----
 
   function updateAuthUI() {
     if (user) {
@@ -1313,14 +1374,16 @@
       if (!dataListener) {
         dataListener = database.ref('data').on('value', (snapshot) => {
           const data = snapshot.val() || {};
-          const chapterKeys = Object.keys(data).filter(key => key !== 'themes');
-          chapters = chapterKeys.map(key => ({ key, ...data[key] }));
-          themes = data.themes || [];
+          const chapterKeys = Object.keys(data).filter((key) => key !== 'themes');
 
-          const chapterThemes = [...new Set(chapters.map(ch => ch.theme))];
+          chapters = chapterKeys.map((key) => ({ key, ...data[key] }));
+          themes = Array.isArray(data.themes) ? data.themes.slice() : [];
+
+          // Rattraper les thèmes existants uniquement sur des chapitres
+          const chapterThemes = [...new Set(chapters.map((ch) => ch.theme).filter(Boolean))];
           let needUpdate = false;
-          chapterThemes.forEach(ct => {
-            if (ct && !themes.includes(ct)) { themes.push(ct); needUpdate = true; }
+          chapterThemes.forEach((ct) => {
+            if (!themes.includes(ct)) { themes.push(ct); needUpdate = true; }
           });
           if (needUpdate) database.ref('data/themes').set(themes);
 
@@ -1406,9 +1469,9 @@
 
   elements.newThemeName.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.addThemeBtn.click(); });
 
-  elements.filterTabs.forEach(tab => {
+  elements.filterTabs.forEach((tab) => {
     tab.addEventListener('click', () => {
-      elements.filterTabs.forEach(t => t.classList.remove('active'));
+      elements.filterTabs.forEach((t) => t.classList.remove('active'));
       tab.classList.add('active');
       renderList();
     });
