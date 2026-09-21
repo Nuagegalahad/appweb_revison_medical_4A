@@ -565,14 +565,6 @@
     .reward-rule .rule-icon { font-size: 1.2rem; flex-shrink: 0; }
     .reward-rule strong { color: var(--navy); font-weight: 800; }
 
-    .reward-detail {
-      font-size: 0.75rem; color: var(--muted);
-      text-align: center; margin-top: 10px;
-      line-height: 1.5; word-break: break-word;
-    }
-
-    .reward-detail strong { color: var(--navy); }
-
     .payment-engagement {
       margin-top: 16px;
       padding: 16px 14px;
@@ -811,13 +803,11 @@
         <span><strong>+ 5 €</strong> par tranche de 10 chapitres relus</span>
       </div>
     </div>
-
-    <div class="reward-detail" id="rewardDetail"></div>
   </div>
 
   <div class="payment-engagement">
     <div><span class="icon">💝</span><strong>Engagement de paiement</strong></div>
-    <p style="margin-top:4px;">Piso recevra <strong>150 €</strong> au mois de <strong>novembre 2026</strong>.</p>
+    <p style="margin-top:4px;">Piso recevra <strong id="paymentAmount">150 €</strong> au mois de <strong>novembre 2026</strong>.</p>
   </div>
 
 </div>
@@ -847,25 +837,26 @@
   /* =========================================================
      PARAMÈTRES DE LA RÉCOMPENSE
      ---------------------------------------------------------
-     Aujourd'hui (21/09/2026) on veut afficher 150 €.
+     Aujourd'hui (21/09/2026) on veut afficher 150 € (plafond).
      Le 04/10/2026 on veut afficher 90 € (si l'étudiante garde
      ses 32 relus actuels, soit 3 paliers = +15 € de bonus).
 
-     On décompose donc :
-       - une base pure qui part de 135 € (21/09) et descend
-         à 75 € (04/10) → écart de 60 € sur 13 jours
-       - les bonus de relecture (+5 € / 10 relus) s'ajoutent
-         à cette base.
+     Décomposition :
+       - base pure part de 135 € (21/09) → descend à 75 € (04/10)
+       - bonus de relecture (+5 € / 10 relus) s'ajoute
+       - plafond global : 150 €
 
-     Résultat : 135 + 15 = 150 € aujourd'hui
-                75 + 15 =  90 € le 04/10
+     Rétablir un jour perdu (≈4,62 €) exige donc de franchir
+     un palier de 10 relus (gain de 5 € > 4,62 €).
+     Relire 1 chapitre seul n'a aucun effet immédiat.
      ========================================================= */
-  const REWARD_START_DATE   = new Date(2026, 8, 21);  // 21/09/2026
-  const REWARD_END_DATE     = new Date(2026, 9, 4);   // 04/10/2026
-  const REWARD_BASE_START   = 135;                    // base pure au 21/09
-  const REWARD_BASE_END     = 75;                     // base pure au 04/10
-  const REWARD_BONUS_PER_TIER = 5;                    // +5 € par palier
-  const REWARD_CHAPTERS_PER_TIER = 10;                // palier = 10 relus
+  const REWARD_START_DATE         = new Date(2026, 8, 21); // 21/09/2026
+  const REWARD_END_DATE           = new Date(2026, 9, 4);  // 04/10/2026
+  const REWARD_BASE_START         = 135;                   // base pure au 21/09
+  const REWARD_BASE_END           = 75;                    // base pure au 04/10
+  const REWARD_MAX                = 150;                   // plafond global
+  const REWARD_BONUS_PER_TIER     = 5;                     // +5 € par palier
+  const REWARD_CHAPTERS_PER_TIER  = 10;                    // palier = 10 relus
 
   const ENCOURAGEMENTS = [
     { i: "🌿", t: "Tu avances, un chapitre à la fois. Doucement mais sûrement." },
@@ -934,8 +925,8 @@
     dailyMessageText: $('dailyMessageText'),
     rewardAmountCard: $('rewardAmountCard'),
     rewardAmount: $('rewardAmount'),
-    rewardDetail: $('rewardDetail'),
-    ruleDaily: $('ruleDaily')
+    ruleDaily: $('ruleDaily'),
+    paymentAmount: $('paymentAmount')
   };
 
   // ---- Utilitaires ----
@@ -970,12 +961,10 @@
   }
 
   function formatEuro(value) {
-    // Arrondi à l'euro, format "152 €"
     return Math.round(value) + ' €';
   }
 
   function formatEuroDecimal(value) {
-    // Format "4,62 €" (2 décimales, virgule française)
     return value.toFixed(2).replace('.', ',') + ' €';
   }
 
@@ -1045,66 +1034,46 @@
 
     const totalDays = Math.round((end.getTime() - start.getTime()) / 86400000); // 13
     let daysElapsed = Math.round((today.getTime() - start.getTime()) / 86400000);
-
-    // On borne : avant le 21/09 → 0 ; après le 04/10 → totalDays (décompte stoppé)
     daysElapsed = Math.max(0, Math.min(totalDays, daysElapsed));
 
     // Base pure : interpolation linéaire 135 € → 75 €
     const basePure = REWARD_BASE_START -
       (daysElapsed / totalDays) * (REWARD_BASE_START - REWARD_BASE_END);
 
-    // Bonus : +5 € par tranche de 10 chapitres relus
+    // Bonus : +5 € par palier de 10 chapitres relus
     const rereadCount = chapters.filter((ch) => ch.done2).length;
     const tiers = Math.floor(rereadCount / REWARD_CHAPTERS_PER_TIER);
     const bonus = tiers * REWARD_BONUS_PER_TIER;
 
-    // Décompte quotidien affiché (positif) : (135-75)/13 ≈ 4,615 €
+    // Décompte quotidien affiché (positif)
     const dailyDecrement = (REWARD_BASE_START - REWARD_BASE_END) / totalDays;
 
-    const total = Math.max(0, basePure + bonus);
+    // Total plafonné à REWARD_MAX et plancher à 0
+    let total = basePure + bonus;
+    total = Math.max(0, Math.min(REWARD_MAX, total));
 
-    return {
-      total,
-      basePure,
-      bonus,
-      tiers,
-      rereadCount,
-      daysElapsed,
-      totalDays,
-      dailyDecrement,
-      isBeforeWindow: daysElapsed === 0,
-      isAfterWindow: daysElapsed === totalDays
-    };
+    return { total, dailyDecrement };
   }
 
   function renderReward() {
     const r = computeReward();
+    const amountText = formatEuro(r.total);
 
-    // Affichage du montant arrondi
-    elements.rewardAmount.textContent = formatEuro(r.total);
+    // Case montant
+    elements.rewardAmount.textContent = amountText;
 
-    // Couleur dynamique selon le montant
+    // Couleur dynamique
     const card = elements.rewardAmountCard;
     card.classList.remove('high', 'mid', 'low');
     if (r.total >= 110) card.classList.add('high');
     else if (r.total >= 80) card.classList.add('mid');
     else card.classList.add('low');
 
-    // Règle affichée : décompte quotidien (calculé dynamiquement)
+    // Règle quotidienne
     elements.ruleDaily.textContent = '− ' + formatEuroDecimal(r.dailyDecrement);
 
-    // Détail sous la case
-    const parts = [];
-    parts.push('Base : <strong>' + formatEuro(r.basePure) + '</strong>');
-    parts.push('Bonus relus : <strong>+' + r.bonus + ' €</strong> (' + r.tiers + ' × 10 relus)');
-    if (!r.isBeforeWindow && !r.isAfterWindow) {
-      parts.push('Jour ' + r.daysElapsed + '/' + r.totalDays);
-    } else if (r.isAfterWindow) {
-      parts.push('Décompte terminé');
-    } else {
-      parts.push('Décompte à venir');
-    }
-    elements.rewardDetail.innerHTML = parts.join(' · ');
+    // Engagement de paiement dynamique
+    elements.paymentAmount.textContent = amountText;
   }
 
   // ---- Liste des chapitres ----
