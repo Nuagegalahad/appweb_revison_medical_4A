@@ -796,11 +796,11 @@
     <div class="reward-rules">
       <div class="reward-rule">
         <span class="rule-icon">📉</span>
-        <span><strong id="ruleDaily">− 4,62 €</strong> par jour (automatique)</span>
+        <span><strong>− 6 €</strong> par jour (automatique)</span>
       </div>
       <div class="reward-rule">
         <span class="rule-icon">📈</span>
-        <span><strong>+ 5 €</strong> par tranche de 10 chapitres relus</span>
+        <span><strong>+ 0,50 €</strong> par chapitre révisé</span>
       </div>
     </div>
   </div>
@@ -837,26 +837,22 @@
   /* =========================================================
      PARAMÈTRES DE LA RÉCOMPENSE
      ---------------------------------------------------------
-     Aujourd'hui (21/09/2026) on veut afficher 150 € (plafond).
-     Le 04/10/2026 on veut afficher 90 € (si l'étudiante garde
-     ses 32 relus actuels, soit 3 paliers = +15 € de bonus).
+     Formule :
+        valeur = 150 €
+                 − 6 €  × jours écoulés depuis le 21/09/2026
+                 + 0,50 € × nombre de chapitres révisés
+        puis bornée entre 0 € et 150 €.
 
-     Décomposition :
-       - base pure part de 135 € (21/09) → descend à 75 € (04/10)
-       - bonus de relecture (+5 € / 10 relus) s'ajoute
-       - plafond global : 150 €
-
-     Rétablir un jour perdu (≈4,62 €) exige donc de franchir
-     un palier de 10 relus (gain de 5 € > 4,62 €).
-     Relire 1 chapitre seul n'a aucun effet immédiat.
+     Aujourd'hui (21/09) : 150 − 0 + 16 = 166 → plafonné à 150 €.
+     Le 24/09 sans rien faire : 150 − 18 + 16 = 148 €.
+     Le 04/10 sans rien faire : 150 − 78 + 16 = 88 €.
      ========================================================= */
-  const REWARD_START_DATE         = new Date(2026, 8, 21); // 21/09/2026
-  const REWARD_END_DATE           = new Date(2026, 9, 4);  // 04/10/2026
-  const REWARD_BASE_START         = 135;                   // base pure au 21/09
-  const REWARD_BASE_END           = 75;                    // base pure au 04/10
-  const REWARD_MAX                = 150;                   // plafond global
-  const REWARD_BONUS_PER_TIER     = 5;                     // +5 € par palier
-  const REWARD_CHAPTERS_PER_TIER  = 10;                    // palier = 10 relus
+  const REWARD_START_DATE    = new Date(2026, 8, 21); // 21/09/2026
+  const REWARD_BASE          = 150;                   // montant initial
+  const REWARD_DAILY_PENALTY = 6;                     // −6 € / jour
+  const REWARD_PER_CHAPTER   = 0.5;                   // +0,50 € / chapitre révisé
+  const REWARD_MAX           = 150;                   // plafond
+  const REWARD_MIN           = 0;                     // plancher
 
   const ENCOURAGEMENTS = [
     { i: "🌿", t: "Tu avances, un chapitre à la fois. Doucement mais sûrement." },
@@ -925,7 +921,6 @@
     dailyMessageText: $('dailyMessageText'),
     rewardAmountCard: $('rewardAmountCard'),
     rewardAmount: $('rewardAmount'),
-    ruleDaily: $('ruleDaily'),
     paymentAmount: $('paymentAmount')
   };
 
@@ -962,10 +957,6 @@
 
   function formatEuro(value) {
     return Math.round(value) + ' €';
-  }
-
-  function formatEuroDecimal(value) {
-    return value.toFixed(2).replace('.', ',') + ' €';
   }
 
   // ---- Grille des jours ----
@@ -1030,49 +1021,32 @@
   function computeReward() {
     const today = startOfDay(new Date());
     const start = startOfDay(REWARD_START_DATE);
-    const end = startOfDay(REWARD_END_DATE);
 
-    const totalDays = Math.round((end.getTime() - start.getTime()) / 86400000); // 13
     let daysElapsed = Math.round((today.getTime() - start.getTime()) / 86400000);
-    daysElapsed = Math.max(0, Math.min(totalDays, daysElapsed));
+    daysElapsed = Math.max(0, daysElapsed);
 
-    // Base pure : interpolation linéaire 135 € → 75 €
-    const basePure = REWARD_BASE_START -
-      (daysElapsed / totalDays) * (REWARD_BASE_START - REWARD_BASE_END);
+    const doneCount = chapters.filter((ch) => ch.done).length;
 
-    // Bonus : +5 € par palier de 10 chapitres relus
-    const rereadCount = chapters.filter((ch) => ch.done2).length;
-    const tiers = Math.floor(rereadCount / REWARD_CHAPTERS_PER_TIER);
-    const bonus = tiers * REWARD_BONUS_PER_TIER;
+    const raw = REWARD_BASE
+      - daysElapsed * REWARD_DAILY_PENALTY
+      + doneCount * REWARD_PER_CHAPTER;
 
-    // Décompte quotidien affiché (positif)
-    const dailyDecrement = (REWARD_BASE_START - REWARD_BASE_END) / totalDays;
-
-    // Total plafonné à REWARD_MAX et plancher à 0
-    let total = basePure + bonus;
-    total = Math.max(0, Math.min(REWARD_MAX, total));
-
-    return { total, dailyDecrement };
+    const total = Math.max(REWARD_MIN, Math.min(REWARD_MAX, raw));
+    return { total };
   }
 
   function renderReward() {
     const r = computeReward();
     const amountText = formatEuro(r.total);
 
-    // Case montant
     elements.rewardAmount.textContent = amountText;
 
-    // Couleur dynamique
     const card = elements.rewardAmountCard;
     card.classList.remove('high', 'mid', 'low');
     if (r.total >= 110) card.classList.add('high');
     else if (r.total >= 80) card.classList.add('mid');
     else card.classList.add('low');
 
-    // Règle quotidienne
-    elements.ruleDaily.textContent = '− ' + formatEuroDecimal(r.dailyDecrement);
-
-    // Engagement de paiement dynamique
     elements.paymentAmount.textContent = amountText;
   }
 
