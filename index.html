@@ -482,103 +482,18 @@
 
     .toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* ---- Section Récompenses ---- */
-
-    .rewards-section {
+    .payment-text {
       margin-top: 22px;
-      padding: 16px 14px 18px;
-      background: var(--card-bg);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .rewards-title {
-      font-family: "Baloo 2", cursive;
-      font-size: 1.15rem; font-weight: 800;
-      color: var(--navy); text-align: center;
-      text-transform: uppercase; letter-spacing: 0.08em;
-      margin-bottom: 12px;
-    }
-
-    .reward-amount-card {
-      border-radius: var(--radius);
-      padding: 22px 16px 20px;
-      text-align: center;
-      margin-bottom: 14px;
-      position: relative;
-      overflow: hidden;
-      transition: background 0.4s, box-shadow 0.4s;
-    }
-
-    .reward-amount-card::before {
-      content: "";
-      position: absolute; inset: 0;
-      background: radial-gradient(circle at top right, rgba(255,255,255,0.28), transparent 60%);
-      pointer-events: none;
-    }
-
-    .reward-amount-card.high {
-      background: linear-gradient(135deg, var(--green), var(--green2));
-      box-shadow: 0 8px 24px rgba(76, 175, 130, 0.30);
-    }
-
-    .reward-amount-card.mid {
-      background: linear-gradient(135deg, #F0A0B0, var(--navy));
-      box-shadow: 0 8px 24px rgba(212, 120, 138, 0.30);
-    }
-
-    .reward-amount-card.low {
-      background: linear-gradient(135deg, var(--coral2), var(--coral));
-      box-shadow: 0 8px 24px rgba(224, 90, 90, 0.30);
-    }
-
-    .reward-amount {
-      font-size: 2.8rem; font-weight: 800; color: white;
-      line-height: 1.05;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
-      position: relative; font-variant-numeric: tabular-nums;
-      letter-spacing: -0.01em;
-    }
-
-    .reward-label {
-      font-size: 0.7rem; font-weight: 700;
-      color: rgba(255, 255, 255, 0.9);
-      text-transform: uppercase; letter-spacing: 0.12em;
-      margin-top: 4px; position: relative;
-    }
-
-    .reward-rules {
-      display: flex; flex-direction: column; gap: 6px;
-    }
-
-    .reward-rule {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px;
-      background: rgba(212, 120, 138, 0.06);
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(200, 180, 160, 0.2);
-      font-size: 0.88rem; font-weight: 500;
-      color: var(--text); line-height: 1.3;
-    }
-
-    .reward-rule .rule-icon { font-size: 1.2rem; flex-shrink: 0; }
-    .reward-rule strong { color: var(--navy); font-weight: 800; }
-
-    .payment-engagement {
-      margin-top: 16px;
       padding: 16px 14px;
       background: rgba(212, 120, 138, 0.06);
       border-radius: var(--radius-sm);
       border: 1px solid rgba(200, 180, 160, 0.2);
       text-align: center;
-      font-size: 0.85rem; color: var(--muted);
-      line-height: 1.6; max-width: 640px;
+      font-size: 0.9rem; color: var(--navy);
+      font-weight: 700; line-height: 1.6;
+      max-width: 640px;
       margin-left: auto; margin-right: auto;
     }
-
-    .payment-engagement strong { color: var(--navy); font-weight: 700; }
-    .payment-engagement .icon { font-size: 1rem; margin-right: 6px; }
 
     .login-overlay {
       display: none; position: fixed; inset: 0;
@@ -655,14 +570,11 @@
       .btn-add { font-size: 0.9rem; }
       input[type="text"], input[type="email"], input[type="password"] { font-size: 0.9rem; padding: 10px 12px; }
       .toast { font-size: 0.85rem; padding: 10px 16px; }
-      .payment-engagement { font-size: 0.78rem; padding: 12px 10px; }
+      .payment-text { font-size: 0.82rem; padding: 12px 10px; }
       .login-box { padding: 1.5rem; }
       .day-grid { grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 5px; }
       .day-cell { font-size: 0.75rem; border-radius: 8px; }
       .day-grid-title { font-size: 0.78rem; }
-      .reward-amount { font-size: 2.4rem; }
-      .rewards-title { font-size: 1rem; }
-      .reward-rule { font-size: 0.82rem; padding: 9px 10px; }
     }
 
     @media (max-width: 360px) {
@@ -677,12 +589,9 @@
       .btn-icon { width: 36px; height: 36px; font-size: 0.9rem; }
       .theme-title { font-size: 0.85rem; }
       .theme-badge { font-size: 0.6rem; padding: 2px 8px; }
-      .payment-engagement { font-size: 0.72rem; padding: 10px 8px; }
+      .payment-text { font-size: 0.76rem; padding: 10px 8px; }
       .day-grid { grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 4px; }
       .day-cell { font-size: 0.68rem; border-radius: 7px; }
-      .reward-amount { font-size: 2.1rem; }
-      .reward-rule { font-size: 0.78rem; padding: 8px 10px; }
-      .reward-rule .rule-icon { font-size: 1.05rem; }
     }
   </style>
 </head>
@@ -784,30 +693,8 @@
 
   <div id="chapterList"></div>
 
-  <!-- ==== SECTION RÉCOMPENSES ==== -->
-  <div class="rewards-section">
-    <h2 class="rewards-title">🏆 Récompenses</h2>
-
-    <div class="reward-amount-card high" id="rewardAmountCard">
-      <div class="reward-amount" id="rewardAmount">150 €</div>
-      <div class="reward-label">Montant actuel</div>
-    </div>
-
-    <div class="reward-rules">
-      <div class="reward-rule">
-        <span class="rule-icon">📉</span>
-        <span><strong>− 6 €</strong> par jour (automatique)</span>
-      </div>
-      <div class="reward-rule">
-        <span class="rule-icon">📈</span>
-        <span><strong>+ 0,50 €</strong> par chapitre révisé</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="payment-engagement">
-    <div><span class="icon">💝</span><strong>Engagement de paiement</strong></div>
-    <p style="margin-top:4px;">Piso recevra <strong id="paymentAmount">150 €</strong> au mois de <strong>novembre 2026</strong>.</p>
+  <div class="payment-text">
+    💝 Versement du paiement à hauteur de 150€ en Novembre.
   </div>
 
 </div>
@@ -833,26 +720,6 @@
   const EXAM_DATE = new Date(2026, 9, 5, 0, 0, 0);
   const HALF_DAY_MS = 12 * 60 * 60 * 1000;
   const MAX_GRID_DAYS = 62;
-
-  /* =========================================================
-     PARAMÈTRES DE LA RÉCOMPENSE
-     ---------------------------------------------------------
-     Formule :
-        valeur = 150 €
-                 − 6 €  × jours écoulés depuis le 21/09/2026
-                 + 0,50 € × nombre de chapitres révisés
-        puis bornée entre 0 € et 150 €.
-
-     Aujourd'hui (21/09) : 150 − 0 + 16 = 166 → plafonné à 150 €.
-     Le 24/09 sans rien faire : 150 − 18 + 16 = 148 €.
-     Le 04/10 sans rien faire : 150 − 78 + 16 = 88 €.
-     ========================================================= */
-  const REWARD_START_DATE    = new Date(2026, 8, 21); // 21/09/2026
-  const REWARD_BASE          = 150;                   // montant initial
-  const REWARD_DAILY_PENALTY = 6;                     // −6 € / jour
-  const REWARD_PER_CHAPTER   = 0.5;                   // +0,50 € / chapitre révisé
-  const REWARD_MAX           = 150;                   // plafond
-  const REWARD_MIN           = 0;                     // plancher
 
   const ENCOURAGEMENTS = [
     { i: "🌿", t: "Tu avances, un chapitre à la fois. Doucement mais sûrement." },
@@ -918,13 +785,8 @@
     dayGrid: $('dayGrid'),
     dayGridCount: $('dayGridCount'),
     dailyMessageIcon: $('dailyMessageIcon'),
-    dailyMessageText: $('dailyMessageText'),
-    rewardAmountCard: $('rewardAmountCard'),
-    rewardAmount: $('rewardAmount'),
-    paymentAmount: $('paymentAmount')
+    dailyMessageText: $('dailyMessageText')
   };
-
-  // ---- Utilitaires ----
 
   function escapeHtml(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({
@@ -954,12 +816,6 @@
   function startOfDay(d) {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
-
-  function formatEuro(value) {
-    return Math.round(value) + ' €';
-  }
-
-  // ---- Grille des jours ----
 
   function renderDayGrid() {
     const today = startOfDay(new Date());
@@ -1004,8 +860,6 @@
     elements.dayGridCount.textContent = daysLeft + (daysLeft > 1 ? ' jours' : ' jour');
   }
 
-  // ---- Statistiques globales ----
-
   function renderStats() {
     const total = chapters.length;
     const done = chapters.filter((ch) => ch.done).length;
@@ -1015,42 +869,6 @@
     elements.statLeft.textContent = total - done;
     elements.statRead2.textContent = done2;
   }
-
-  // ---- Récompenses ----
-
-  function computeReward() {
-    const today = startOfDay(new Date());
-    const start = startOfDay(REWARD_START_DATE);
-
-    let daysElapsed = Math.round((today.getTime() - start.getTime()) / 86400000);
-    daysElapsed = Math.max(0, daysElapsed);
-
-    const doneCount = chapters.filter((ch) => ch.done).length;
-
-    const raw = REWARD_BASE
-      - daysElapsed * REWARD_DAILY_PENALTY
-      + doneCount * REWARD_PER_CHAPTER;
-
-    const total = Math.max(REWARD_MIN, Math.min(REWARD_MAX, raw));
-    return { total };
-  }
-
-  function renderReward() {
-    const r = computeReward();
-    const amountText = formatEuro(r.total);
-
-    elements.rewardAmount.textContent = amountText;
-
-    const card = elements.rewardAmountCard;
-    card.classList.remove('high', 'mid', 'low');
-    if (r.total >= 110) card.classList.add('high');
-    else if (r.total >= 80) card.classList.add('mid');
-    else card.classList.add('low');
-
-    elements.paymentAmount.textContent = amountText;
-  }
-
-  // ---- Liste des chapitres ----
 
   function renderList() {
     const filter = document.querySelector('.filter-tab.active')?.dataset.filter || 'all';
@@ -1140,8 +958,6 @@
     attachChapterEvents();
   }
 
-  // ---- Gestion des thèmes ----
-
   function renderThemeManager() {
     let html = '';
     themes.forEach((theme) => {
@@ -1169,8 +985,6 @@
       .map((t) => `<option value="${escapeHtml(t)}" />`)
       .join('');
   }
-
-  // ---- Événements des chapitres ----
 
   function attachChapterEvents() {
     elements.chapterList.querySelectorAll('.custom-cb').forEach((el) => {
@@ -1283,8 +1097,6 @@
     renderThemeManager();
   }
 
-  // ---- Auth / chargement des données ----
-
   function updateAuthUI() {
     if (user) {
       elements.authStatus.textContent = 'Connecté';
@@ -1309,7 +1121,6 @@
           renderStats();
           renderList();
           renderThemeManager();
-          renderReward();
         }, (error) => {
           console.error('Erreur Firebase :', error);
           showToast('Impossible de charger les données. Vérifie ta connexion et les règles de sécurité.');
@@ -1330,7 +1141,6 @@
       renderStats();
       renderList();
       renderThemeManager();
-      renderReward();
     }
   }
 
@@ -1404,20 +1214,17 @@
   setInterval(displayEncouragement, 60000);
 
   renderDayGrid();
-  renderReward();
   setInterval(() => {
     const now = new Date();
     const key = dateKey(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
     if (key !== lastGridDayKey) {
       renderDayGrid();
-      renderReward();
     }
   }, 60000);
 
   renderStats();
   renderList();
   renderThemeManager();
-  renderReward();
 </script>
 
 </body>
