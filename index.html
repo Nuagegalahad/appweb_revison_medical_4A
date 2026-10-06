@@ -147,40 +147,40 @@
       gap: 6px;
     }
 
+    /* Base : jour pas encore passé → couleur claire, NON mise en valeur */
     .day-cell {
       aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
       border-radius: 10px; font-weight: 700; font-size: 0.82rem;
-      background: white; border: 1.5px solid var(--border); color: var(--muted);
+      background: #FFFFFF; border: 1.5px solid var(--border); color: var(--muted);
       transition: transform 0.2s; font-variant-numeric: tabular-nums;
     }
 
+    /* Jour déjà passé → mise en valeur (vert foncé) */
     .day-cell.past {
-      background: linear-gradient(135deg, var(--green-light), var(--green-mid));
-      border-color: transparent; color: var(--green-dark);
+      background: linear-gradient(135deg, var(--green-dark), #1F6B4A);
+      color: white; border-color: transparent;
+      box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.20);
     }
 
+    /* Aujourd'hui → mise en valeur + animation */
     .day-cell.today {
       background: linear-gradient(135deg, var(--green), var(--green2));
       color: white; border-color: transparent;
+      box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.25);
       animation: todayGlow 2.6s ease-in-out infinite;
     }
 
-    .day-cell.exam {
-      background: linear-gradient(135deg, var(--green-dark), #1F6B4A);
-      color: white; border-color: transparent;
-      box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.28);
+    /* Jour pas encore passé (futur) → explicitement clair, non mis en valeur */
+    .day-cell.future {
+      background: #FFFFFF;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      box-shadow: none;
     }
-
-    .day-cell.exam.today { animation: todayGlowExam 2.6s ease-in-out infinite; }
 
     @keyframes todayGlow {
-      0%, 100% { box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.18); }
-      50% { box-shadow: 0 0 0 7px rgba(76, 175, 130, 0.32); }
-    }
-
-    @keyframes todayGlowExam {
-      0%, 100% { box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.25); }
-      50% { box-shadow: 0 0 0 7px rgba(76, 175, 130, 0.4); }
+      0%, 100% { box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.22); }
+      50% { box-shadow: 0 0 0 8px rgba(76, 175, 130, 0.38); }
     }
 
     .day-grid-done {
@@ -631,7 +631,7 @@
 
   <div class="day-grid-card">
     <div class="day-grid-head">
-      <span class="day-grid-title" id="dayGridTitle">Jours jusqu'aux examens</span>
+      <span class="day-grid-title" id="dayGridTitle">Examens · 5 → 19 octobre</span>
       <span class="day-grid-count" id="dayGridCount">—</span>
     </div>
     <div class="day-grid" id="dayGrid"></div>
@@ -722,7 +722,6 @@
   const EXAM_END = new Date(2026, 9, 19, 0, 0, 0);
 
   const HALF_DAY_MS = 12 * 60 * 60 * 1000;
-  const MAX_GRID_DAYS = 62;
 
   /* ⬇️ Messages d'encouragement pour les EXAMENS */
   const ENCOURAGEMENTS = [
@@ -826,7 +825,11 @@
     return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / 86400000);
   }
 
-  /* ⬇️ Calendrier des EXAMENS (5 → 19 octobre) avec jours restants */
+  /* ⬇️ Calendrier : commence le 5, se termine le 19 (jours d'examens)
+     - Jours DÉJÀ PASSÉS  → mis en valeur (vert foncé)
+     - Aujourd'hui        → mis en valeur + animation
+     - Jours PAS ENCORE passés → couleur claire, NON mis en valeur
+  */
   function renderDayGrid() {
     const today = startOfDay(new Date());
     const examStart = startOfDay(EXAM_START);
@@ -834,61 +837,48 @@
 
     lastGridDayKey = dateKey(today);
 
-    /* Examens terminés */
+    /* Titre */
+    if (today.getTime() < examStart.getTime()) {
+      elements.dayGridTitle.textContent = "Examens à venir · 5 → 19 octobre";
+    } else if (today.getTime() > examEnd.getTime()) {
+      elements.dayGridTitle.textContent = "Examens terminés";
+    } else {
+      elements.dayGridTitle.textContent = "Examens en cours · 5 → 19 octobre";
+    }
+
+    /* Compteur de jours restants */
+    let countText;
     if (today.getTime() > examEnd.getTime()) {
-      elements.dayGridTitle.textContent = 'Examens terminés';
+      countText = 'Terminé';
+    } else if (today.getTime() < examStart.getTime()) {
+      const n = diffDays(today, examStart);
+      countText = 'J-' + n;
+    } else {
+      const n = diffDays(today, examEnd);
+      countText = n === 0 ? 'Dernier jour' : n + (n > 1 ? ' jours restants' : ' jour restant');
+    }
+    elements.dayGridCount.textContent = countText;
+
+    /* Message central si les examens sont passés */
+    if (today.getTime() > examEnd.getTime()) {
       elements.dayGrid.innerHTML = '<div class="day-grid-done">🎉 Les examens sont terminés, bravo Piso !</div>';
-      elements.dayGridCount.textContent = 'Terminé';
       return;
     }
 
-    /* Titre dynamique */
-    if (today.getTime() < examStart.getTime()) {
-      elements.dayGridTitle.textContent = "Jours jusqu'aux examens";
-    } else {
-      elements.dayGridTitle.textContent = "Jours restants d'examens";
-    }
-
-    /* Fenêtre affichée dans la grille */
-    let start = new Date(today.getFullYear(), today.getMonth(), 1);
-    const daysFromStart = Math.round((examEnd.getTime() - start.getTime()) / 86400000) + 1;
-
-    let end;
-    if (daysFromStart < 14) {
-      start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      end = examEnd;
-    } else if (daysFromStart <= MAX_GRID_DAYS) {
-      end = examEnd;
-    } else {
-      end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    }
-
+    /* Grille : du 5 octobre au 19 octobre */
     let html = '';
-    const cursor = new Date(start.getTime());
-    while (cursor.getTime() <= end.getTime()) {
+    const cursor = new Date(examStart.getTime());
+    while (cursor.getTime() <= examEnd.getTime()) {
       const t = cursor.getTime();
       let cls = 'day-cell';
-      if (t < today.getTime()) cls += ' past';
-      else if (t === today.getTime()) cls += ' today';
-      /* Jours d'examens : du 5 au 19 octobre */
-      if (t >= examStart.getTime() && t <= examEnd.getTime()) cls += ' exam';
+      if (t < today.getTime()) cls += ' past';        /* déjà passé → mise en valeur */
+      else if (t === today.getTime()) cls += ' today'; /* aujourd'hui → mise en valeur */
+      else cls += ' future';                           /* pas encore passé → clair */
       html += '<div class="' + cls + '">' + cursor.getDate() + '</div>';
       cursor.setDate(cursor.getDate() + 1);
     }
 
     elements.dayGrid.innerHTML = html;
-
-    /* Compteur de jours restants */
-    let countText;
-    if (today.getTime() < examStart.getTime()) {
-      const n = diffDays(today, examStart);
-      countText = n + (n > 1 ? ' jours' : ' jour');
-    } else {
-      const n = diffDays(today, examEnd);
-      if (n === 0) countText = 'Dernier jour';
-      else countText = n + (n > 1 ? ' jours' : ' jour');
-    }
-    elements.dayGridCount.textContent = countText;
   }
 
   function renderStats() {
