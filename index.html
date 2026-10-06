@@ -438,19 +438,18 @@
       letter-spacing: 0.03em; word-break: break-word;
     }
 
-    /* Chevron pour replier / déplier un thème */
+    /* Bouton chevron pour replier / déplier un thème terminé */
     .theme-toggle {
       cursor: pointer; user-select: none;
       font-size: 1rem; color: var(--muted);
       padding: 6px 8px; border-radius: 8px;
       line-height: 1; flex-shrink: 0;
       transition: transform 0.3s, background 0.15s;
-      display: inline-flex; align-items: center; justify-content: center;
     }
 
     .theme-toggle:active { background: rgba(196, 96, 122, 0.08); }
 
-    /* Quand le thème est replié : la carte est masquée et le chevron pivote */
+    /* Quand le thème est replié, la carte est cachée et le chevron pivote */
     .theme-section.collapsed .theme-card { display: none; }
     .theme-section.collapsed .theme-toggle { transform: rotate(-90deg); }
 
@@ -993,13 +992,14 @@
   /* ═════════════════════════════════════════════════════════════════════
      ÉTAT GLOBAL DE L'APPLICATION
      ═════════════════════════════════════════════════════════════════════ */
-  let chapters = [];                 /* Tableau des chapitres (depuis Firebase) */
-  let themes = [];                   /* Liste des thèmes personnalisés */
-  let examDoneThemes = [];           /* Thèmes dont l'examen est marqué terminé */
-  let collapsedThemes = [];          /* Thèmes repliés manuellement (état local, non persistant) */
-  let user = null;                   /* Utilisateur Firebase courant */
-  let dataListener = null;           /* Référence du listener Firebase temps réel */
-  let lastGridDayKey = '';           /* Dernière date rendue dans le calendrier (pour reset minuit) */
+  let chapters = [];            /* Tableau des chapitres (depuis Firebase) */
+  let themes = [];              /* Liste des thèmes personnalisés */
+  let examDoneThemes = [];      /* Thèmes dont l'examen est marqué terminé */
+  let expandedThemes = [];      /* Thèmes manuellement dépliés par l'utilisateur */
+                                /* (utilisé pour garder un thème déplié même après coche) */
+  let user = null;              /* Utilisateur Firebase courant */
+  let dataListener = null;      /* Référence du listener Firebase temps réel */
+  let lastGridDayKey = '';      /* Dernière date rendue dans le calendrier (pour reset minuit) */
 
   /* Raccourci pratique : document.getElementById */
   const $ = (id) => document.getElementById(id);
@@ -1217,7 +1217,7 @@
      LISTE DES CHAPITRES (groupés par thème)
      Inclut :
        - une case "examen terminé" devant chaque thème,
-       - un chevron pour replier/déplier un thème,
+       - un chevron pour replier/déplier un thème terminé,
        - les cases "1" (révision) et "2" (relecture) devant chaque chapitre.
      ═════════════════════════════════════════════════════════════════════ */
   function renderList() {
@@ -1276,13 +1276,8 @@
       const examCheckCls = examDone ? 'checked' : '';
       const cardCls = examDone ? 'exam-done' : '';
 
-      /* Le thème est replié SI :
-         - il a été replié manuellement (collapsedThemes), OU
-         - son examen est terminé ET l'utilisateur ne l'a pas déplié manuellement.
-         Logique : quand on coche l'examen → auto-collapse (sauf si déjà déplié manuellement). */
-      const isManuallyCollapsed = collapsedThemes.includes(theme);
-      const isManuallyExpanded = expandedThemes.includes(theme);
-      const collapsed = isManuallyCollapsed || (examDone && !isManuallyExpanded);
+      /* Replié par défaut SI l'examen est terminé ET que l'utilisateur ne l'a pas déplié */
+      const collapsed = examDone && !expandedThemes.includes(theme);
       const sectionCls = collapsed ? 'collapsed' : '';
 
       html += `
@@ -1404,27 +1399,11 @@
       });
     });
 
-    /* Chevrons pour replier / déplier un thème (mise à jour directe du DOM,
-       pas de re-rendu complet → transition fluide) */
+    /* Chevrons pour replier / déplier un thème */
     elements.chapterList.querySelectorAll('.theme-toggle').forEach((el) => {
       el.addEventListener('click', function (e) {
         e.stopPropagation();
-        const theme = this.dataset.theme;
-        const section = this.closest('.theme-section');
-        if (!section) return;
-
-        /* Toggle de la classe "collapsed" sur la section */
-        const willBeCollapsed = !section.classList.contains('collapsed');
-        section.classList.toggle('collapsed', willBeCollapsed);
-
-        /* Mise à jour des états internes pour cohérence */
-        if (willBeCollapsed) {
-          if (!collapsedThemes.includes(theme)) collapsedThemes.push(theme);
-          expandedThemes = expandedThemes.filter((t) => t !== theme);
-        } else {
-          collapsedThemes = collapsedThemes.filter((t) => t !== theme);
-          if (!expandedThemes.includes(theme)) expandedThemes.push(theme);
-        }
+        toggleThemeCollapse(this.dataset.theme);
       });
     });
   }
@@ -1434,31 +1413,34 @@
      ═════════════════════════════════════════════════════════════════════ */
 
   /* Bascule l'état "examen terminé" d'un thème.
-     Quand on coche → le thème se replie automatiquement (sauf s'il est déjà
-     explicitement déplié par l'utilisateur). */
+     Quand coché → le thème se replie automatiquement. */
   function toggleExamDone(theme) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
 
     const idx = examDoneThemes.indexOf(theme);
-    const wasChecked = idx >= 0;
-
-    if (wasChecked) {
-      /* Décoche */
+    if (idx >= 0) {
+      /* On décoche : on retire aussi du set "déplié" (plus utile) */
       examDoneThemes.splice(idx, 1);
-      /* Le thème redevient déplié par défaut */
-      collapsedThemes = collapsedThemes.filter((t) => t !== theme);
+      expandedThemes = expandedThemes.filter((t) => t !== theme);
     } else {
-      /* Coche → auto-repli sauf si déjà déplié manuellement */
+      /* On coche : on s'assure qu'il ne reste pas dans "déplié" → sera replié par défaut */
       examDoneThemes.push(theme);
-      if (!expandedThemes.includes(theme)) {
-        if (!collapsedThemes.includes(theme)) collapsedThemes.push(theme);
-      }
+      expandedThemes = expandedThemes.filter((t) => t !== theme);
     }
 
     /* Sauvegarde l'état des examens cochés dans Firebase */
     database.ref('data/examThemes').set(examDoneThemes);
+  }
 
-    /* Re-rendu immédiat pour appliquer le repli sans attendre Firebase */
+  /* Replie / déplie un thème (via le chevron) */
+  function toggleThemeCollapse(theme) {
+    const idx = expandedThemes.indexOf(theme);
+    if (idx >= 0) {
+      expandedThemes.splice(idx, 1);   /* était déplié → on replie */
+    } else {
+      expandedThemes.push(theme);      /* était replié → on déplie */
+    }
+    /* Re-rendu de la liste pour refléter l'état */
     renderList();
   }
 
@@ -1567,9 +1549,6 @@
       database.ref('data/examThemes').set(examDoneThemes);
     }
 
-    /* Nettoyage local */
-    collapsedThemes = collapsedThemes.filter((t) => t !== theme);
-
     renderThemeManager();
   }
 
@@ -1631,7 +1610,7 @@
       chapters = [];
       themes = [];
       examDoneThemes = [];
-      collapsedThemes = [];
+      expandedThemes = [];
       renderStats();
       renderList();
       renderThemeManager();
