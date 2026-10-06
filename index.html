@@ -631,7 +631,7 @@
 
   <div class="day-grid-card">
     <div class="day-grid-head">
-      <span class="day-grid-title">Jours jusqu'à l'examen</span>
+      <span class="day-grid-title" id="dayGridTitle">Jours jusqu'aux examens</span>
       <span class="day-grid-count" id="dayGridCount">—</span>
     </div>
     <div class="day-grid" id="dayGrid"></div>
@@ -717,35 +717,39 @@
   const auth = firebase.auth();
   const database = firebase.database();
 
-  const EXAM_DATE = new Date(2026, 9, 5, 0, 0, 0);
+  /* ⬇️ Période d'examens : du 5 au 19 octobre 2026 */
+  const EXAM_START = new Date(2026, 9, 5, 0, 0, 0);
+  const EXAM_END = new Date(2026, 9, 19, 0, 0, 0);
+
   const HALF_DAY_MS = 12 * 60 * 60 * 1000;
   const MAX_GRID_DAYS = 62;
 
+  /* ⬇️ Messages d'encouragement pour les EXAMENS */
   const ENCOURAGEMENTS = [
-    { i: "🌿", t: "Tu avances, un chapitre à la fois. Doucement mais sûrement." },
-    { i: "☀️", t: "Chaque page lue aujourd'hui est une victoire tranquille." },
-    { i: "💪", t: "Piso, tu es plus forte que tu ne le penses." },
-    { i: "🌸", t: "Prends ton temps, tu n'as rien à prouver à personne." },
-    { i: "📚", t: "Un petit pas aujourd'hui vaut mieux qu'un grand demain." },
+    { i: "🌿", t: "Tu as tout donné pour en arriver là. Fais-toi confiance." },
+    { i: "☀️", t: "Respire un bon coup, tu connais ton sujet." },
+    { i: "💪", t: "Piso, tu es plus forte que n'importe quel examen." },
+    { i: "🌸", t: "C'est normal d'avoir peur, mais tu vas y arriver." },
+    { i: "📚", t: "Chaque question est une occasion de montrer ce que tu sais." },
     { i: "🫶", t: "Tu fais de ton mieux, et c'est déjà énorme." },
-    { i: "🌙", t: "Repose-toi quand il faut, tu reviendras plus forte." },
-    { i: "✨", t: "Ta régularité vaut tous les talents du monde." },
-    { i: "🌱", t: "Chaque révision fait pousser un peu plus ta confiance." },
+    { i: "🌙", t: "Dors bien avant l'épreuve, ton cerveau a besoin de repos." },
+    { i: "✨", t: "Tu as révisé, fais maintenant confiance à ta mémoire." },
+    { i: "🌱", t: "Chaque examen passé te rapproche de la fin." },
     { i: "🍀", t: "Respire. Tu es exactement là où tu dois être." },
     { i: "💛", t: "Je crois en toi, Piso. Vraiment." },
-    { i: "🎈", t: "Un chapitre coché, et tu peux être fière de toi." },
-    { i: "🌻", t: "Les efforts d'aujourd'hui seront ta réussite de demain." },
+    { i: "🎈", t: "Un examen à la fois, une question à la fois." },
+    { i: "🌻", t: "Les efforts de ces mois vont payer, tu verras." },
     { i: "🧸", t: "Sois aussi douce avec toi que tu l'es avec les autres." },
-    { i: "🔆", t: "Tu es capable de grandes choses, une page à la fois." },
-    { i: "🌊", t: "Laisse les choses avancer à leur rythme, sans te presser." },
-    { i: "🕊️", t: "Un jour à la fois, un objectif à la fois." },
+    { i: "🔆", t: "Tu es capable de grandes choses, une épreuve à la fois." },
+    { i: "🌊", t: "Laisse le stress passer, comme une vague." },
+    { i: "🕊️", t: "Un jour à la fois, un examen à la fois." },
     { i: "🍃", t: "Ta patience finira par payer, tu verras." },
     { i: "⭐", t: "Tu es sur le bon chemin, continue comme ça." },
     { i: "🎀", t: "Bravo pour tout ce que tu as déjà accompli, Piso." },
     { i: "🌈", t: "Après l'effort vient toujours la lumière." },
     { i: "💗", t: "Tu mérites de réussir, et tu vas y arriver." },
-    { i: "🧠", t: "Chaque relecture rend ton savoir plus solide." },
-    { i: "🎯", t: "Objectif : 5 octobre 2026. Tu y arriveras." }
+    { i: "🧠", t: "Tout ce que tu as appris est là, dans ta tête." },
+    { i: "🎯", t: "Objectif : 19 octobre 2026. Tu y arriveras." }
   ];
 
   let chapters = [];
@@ -784,6 +788,7 @@
     logoutBtn: $('logoutBtn'),
     dayGrid: $('dayGrid'),
     dayGridCount: $('dayGridCount'),
+    dayGridTitle: $('dayGridTitle'),
     dailyMessageIcon: $('dailyMessageIcon'),
     dailyMessageText: $('dailyMessageText')
   };
@@ -817,27 +822,43 @@
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
+  function diffDays(from, to) {
+    return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / 86400000);
+  }
+
+  /* ⬇️ Calendrier des EXAMENS (5 → 19 octobre) avec jours restants */
   function renderDayGrid() {
     const today = startOfDay(new Date());
-    const exam = startOfDay(EXAM_DATE);
+    const examStart = startOfDay(EXAM_START);
+    const examEnd = startOfDay(EXAM_END);
 
     lastGridDayKey = dateKey(today);
 
-    if (today.getTime() > exam.getTime()) {
-      elements.dayGrid.innerHTML = '<div class="day-grid-done">🎉 L\'examen est passé, bravo Piso !</div>';
+    /* Examens terminés */
+    if (today.getTime() > examEnd.getTime()) {
+      elements.dayGridTitle.textContent = 'Examens terminés';
+      elements.dayGrid.innerHTML = '<div class="day-grid-done">🎉 Les examens sont terminés, bravo Piso !</div>';
       elements.dayGridCount.textContent = 'Terminé';
       return;
     }
 
+    /* Titre dynamique */
+    if (today.getTime() < examStart.getTime()) {
+      elements.dayGridTitle.textContent = "Jours jusqu'aux examens";
+    } else {
+      elements.dayGridTitle.textContent = "Jours restants d'examens";
+    }
+
+    /* Fenêtre affichée dans la grille */
     let start = new Date(today.getFullYear(), today.getMonth(), 1);
-    const daysFromStart = Math.round((exam.getTime() - start.getTime()) / 86400000) + 1;
+    const daysFromStart = Math.round((examEnd.getTime() - start.getTime()) / 86400000) + 1;
 
     let end;
     if (daysFromStart < 14) {
       start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      end = exam;
+      end = examEnd;
     } else if (daysFromStart <= MAX_GRID_DAYS) {
-      end = exam;
+      end = examEnd;
     } else {
       end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     }
@@ -849,15 +870,25 @@
       let cls = 'day-cell';
       if (t < today.getTime()) cls += ' past';
       else if (t === today.getTime()) cls += ' today';
-      if (t === exam.getTime()) cls += ' exam';
+      /* Jours d'examens : du 5 au 19 octobre */
+      if (t >= examStart.getTime() && t <= examEnd.getTime()) cls += ' exam';
       html += '<div class="' + cls + '">' + cursor.getDate() + '</div>';
       cursor.setDate(cursor.getDate() + 1);
     }
 
     elements.dayGrid.innerHTML = html;
 
-    const daysLeft = Math.round((exam.getTime() - today.getTime()) / 86400000) + 1;
-    elements.dayGridCount.textContent = daysLeft + (daysLeft > 1 ? ' jours' : ' jour');
+    /* Compteur de jours restants */
+    let countText;
+    if (today.getTime() < examStart.getTime()) {
+      const n = diffDays(today, examStart);
+      countText = n + (n > 1 ? ' jours' : ' jour');
+    } else {
+      const n = diffDays(today, examEnd);
+      if (n === 0) countText = 'Dernier jour';
+      else countText = n + (n > 1 ? ' jours' : ' jour');
+    }
+    elements.dayGridCount.textContent = countText;
   }
 
   function renderStats() {
