@@ -5,42 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
   <title>Ma Révision Médicale</title>
 
+  <!-- Polices Google Fonts : Baloo 2 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
+  <!-- SDK Firebase (compat) : App, Realtime Database, Auth -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <style>
+    /* ═══════════════════════════════════════════════════════════════════
+       VARIABLES GLOBALES (couleurs, tailles, ombres, rayons)
+       Modifier ici pour ajuster tout le thème du site.
+       ═══════════════════════════════════════════════════════════════════ */
     :root {
-      --cream: #FFF8F0;
-      --coral: #E05A5A;
+      --cream: #FFF8F0;               /* Fond principal crème */
+      --coral: #E05A5A;               /* Rouge corail (accent) */
       --coral2: #F07070;
-      --navy: #D4788A;
+      --navy: #D4788A;                /* Rose principal (header, boutons) */
       --navy2: #D4788A;
       --blue: #F0A0B0;
-      --green: #4CAF82;
+      --green: #4CAF82;               /* Vert (validations, progression) */
       --green2: #3CB870;
       --green-dark: #2E8B62;
       --green-light: #E3F5EC;
       --green-mid: #A8DCC2;
-      --border: #E8D5C4;
-      --card-bg: #FFFCF8;
-      --text: #2E1A1A;
-      --muted: #8A7A6A;
+      --border: #E8D5C4;              /* Bordure beige */
+      --card-bg: #FFFCF8;             /* Fond des cartes */
+      --text: #2E1A1A;                /* Texte principal */
+      --muted: #8A7A6A;               /* Texte secondaire */
       --white: #FFFFFF;
       --shadow: 0 4px 20px rgba(196, 96, 122, 0.10);
-      --radius: 18px;
+      --radius: 18px;                 /* Rayon cartes principales */
       --radius-sm: 10px;
       --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       --font-base: 18px;
-      --touch-size: 48px;
+      --touch-size: 48px;             /* Taille min des zones tactiles */
     }
 
+    /* Reset basique + suppression des surbrillances tactiles */
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+    /* Style global du body */
     body {
       background-color: var(--cream);
       min-height: 100vh;
@@ -52,6 +60,7 @@
       -webkit-text-size-adjust: 100%;
     }
 
+    /* Motif quadrillé subtil en arrière-plan */
     body::before {
       content: "";
       position: fixed;
@@ -65,6 +74,7 @@
 
     .content { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 0 4px; }
 
+    /* ═══════════════ EN-TÊTE (header avec titre) ═══════════════ */
     .header {
       background: linear-gradient(145deg, var(--navy), var(--navy2));
       padding: 18px 14px 16px;
@@ -77,6 +87,7 @@
       width: 100%;
     }
 
+    /* Bande décorative en pointillés sous le header */
     .header::after {
       content: "";
       position: absolute;
@@ -101,6 +112,7 @@
       font-weight: 600; word-break: break-word;
     }
 
+    /* ═══════════════ MESSAGE DU JOUR ═══════════════ */
     .daily-message {
       background: var(--card-bg);
       border: 1.5px solid var(--border);
@@ -117,6 +129,7 @@
       color: var(--navy); margin: 0; line-height: 1.4; word-break: break-word;
     }
 
+    /* ═══════════════ CARTE DE FÉLICITATIONS FINALE ═══════════════ */
     .congrats-card {
       display: none;
       background: linear-gradient(145deg, #FFF0F5, #FFE4EC);
@@ -136,6 +149,7 @@
       letter-spacing: 0.5em; opacity: 0.7;
     }
 
+    /* Affichée uniquement quand la classe "show" est ajoutée en JS */
     .congrats-card.show { display: block; }
 
     .congrats-emoji {
@@ -168,6 +182,7 @@
       50% { transform: translateY(-6px); }
     }
 
+    /* ═══════════════ CALENDRIER DES EXAMENS ═══════════════ */
     .day-grid-card {
       background: var(--card-bg);
       border: 1.5px solid var(--border);
@@ -198,6 +213,7 @@
       gap: 6px;
     }
 
+    /* Cellule de base (utilisée aussi pour les jours futurs) */
     .day-cell {
       aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
       border-radius: 10px; font-weight: 700; font-size: 0.82rem;
@@ -205,12 +221,14 @@
       transition: transform 0.2s; font-variant-numeric: tabular-nums;
     }
 
+    /* Jour déjà passé → mis en valeur (vert foncé) */
     .day-cell.past {
       background: linear-gradient(135deg, var(--green-dark), #1F6B4A);
       color: white; border-color: transparent;
       box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.20);
     }
 
+    /* Aujourd'hui → mis en valeur + animation pulsée */
     .day-cell.today {
       background: linear-gradient(135deg, var(--green), var(--green2));
       color: white; border-color: transparent;
@@ -218,6 +236,7 @@
       animation: todayGlow 2.6s ease-in-out infinite;
     }
 
+    /* Jour à venir → clair, non mis en valeur */
     .day-cell.future {
       background: #FFFFFF;
       border: 1.5px solid var(--border);
@@ -236,6 +255,7 @@
       font-size: 0.95rem; line-height: 1.5;
     }
 
+    /* ═══════════════ STATISTIQUES (4 cartes) ═══════════════ */
     .stats-row {
       display: grid; grid-template-columns: repeat(4, 1fr);
       gap: 6px; margin-bottom: 14px;
@@ -253,10 +273,11 @@
 
     .stat-num { font-size: 2.1rem; font-weight: 800; line-height: 1.1; margin-bottom: 1px; }
 
-    .stat-card.total .stat-num { color: var(--navy); }
-    .stat-card.done .stat-num { color: var(--green); }
-    .stat-card.left .stat-num { color: var(--coral); }
-    .stat-card.reread .stat-num { color: #B85F76; }
+    /* Couleurs des chiffres selon la carte */
+    .stat-card.total .stat-num { color: var(--navy); }      /* Tout */
+    .stat-card.done .stat-num { color: var(--green); }      /* Fini */
+    .stat-card.left .stat-num { color: var(--coral); }      /* Pas finis */
+    .stat-card.reread .stat-num { color: #B85F76; }         /* Relus */
 
     .stat-label {
       font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
@@ -264,6 +285,7 @@
       display: block; word-break: break-word;
     }
 
+    /* ═══════════════ CARTES PLIABLES (Ajout / Gestion) ═══════════════ */
     .add-card {
       background: var(--card-bg);
       border: 1.5px solid var(--border);
@@ -315,6 +337,7 @@
       text-transform: uppercase; letter-spacing: 0.06em; padding-left: 4px;
     }
 
+    /* Champs de saisie (texte / email / password) */
     input[type="text"],
     input[type="email"],
     input[type="password"] {
@@ -349,6 +372,7 @@
 
     .btn-add:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(196, 96, 122, 0.1); }
 
+    /* ═══════════════ BARRE DE RECHERCHE ═══════════════ */
     .search-wrap { position: relative; margin-bottom: 10px; }
 
     .search-icon {
@@ -369,6 +393,7 @@
       box-shadow: 0 0 0 3px rgba(196, 96, 122, 0.06);
     }
 
+    /* ═══════════════ FILTRES (Tous / Pas encore relus / Relus) ═══════════════ */
     .filter-tabs {
       display: flex; gap: 6px; margin-bottom: 12px;
       overflow-x: auto; padding-bottom: 4px;
@@ -397,6 +422,7 @@
       color: white; box-shadow: 0 4px 14px rgba(196, 96, 122, 0.15);
     }
 
+    /* ═══════════════ SECTIONS PAR THÈME ═══════════════ */
     .theme-section { margin-bottom: 16px; }
 
     .theme-header {
@@ -412,6 +438,23 @@
       letter-spacing: 0.03em; word-break: break-word;
     }
 
+    /* Chevron pour replier / déplier un thème */
+    .theme-toggle {
+      cursor: pointer; user-select: none;
+      font-size: 1rem; color: var(--muted);
+      padding: 6px 8px; border-radius: 8px;
+      line-height: 1; flex-shrink: 0;
+      transition: transform 0.3s, background 0.15s;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    .theme-toggle:active { background: rgba(196, 96, 122, 0.08); }
+
+    /* Quand le thème est replié : la carte est masquée et le chevron pivote */
+    .theme-section.collapsed .theme-card { display: none; }
+    .theme-section.collapsed .theme-toggle { transform: rotate(-90deg); }
+
+    /* Case à cocher "examen du thème terminé" */
     .exam-check {
       width: 28px; height: 28px; border-radius: 50%;
       border: 2px dashed var(--border); background: white;
@@ -458,11 +501,13 @@
       transition: border-color 0.3s, box-shadow 0.3s;
     }
 
+    /* Style de carte quand l'examen du thème est terminé */
     .theme-card.exam-done {
       border-color: var(--green-mid);
       box-shadow: 0 4px 20px rgba(76, 175, 130, 0.14);
     }
 
+    /* ═══════════════ LIGNES DE CHAPITRE ═══════════════ */
     .chapter-item {
       display: flex; align-items: center; gap: 10px;
       min-height: var(--touch-size); padding: 8px 12px;
@@ -476,6 +521,7 @@
 
     .cb-group { display: flex; gap: 5px; flex-shrink: 0; }
 
+    /* Cases à cocher personnalisées "1" et "2" */
     .custom-cb {
       width: 28px; height: 28px; border-radius: 8px;
       border: 2px solid var(--border); background: white;
@@ -508,6 +554,7 @@
       box-shadow: 0 2px 10px rgba(212, 120, 138, 0.28);
     }
 
+    /* Coche blanche dessinée en CSS */
     .custom-cb.checked::after {
       content: ""; width: 6px; height: 12px;
       border: solid white; border-width: 0 2.5px 2.5px 0;
@@ -539,6 +586,7 @@
     .btn-icon.del:active { background: rgba(224, 90, 90, 0.08); color: var(--coral); }
     .btn-icon.save { color: var(--green); }
 
+    /* ═══════════════ GESTION DES THÈMES (dans le formulaire) ═══════════════ */
     .theme-list-item {
       display: flex; align-items: center; justify-content: space-between;
       padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 0.9rem;
@@ -548,6 +596,7 @@
     .theme-list-name { flex: 1; word-break: break-word; }
     .theme-list-actions .btn-icon { width: 32px; height: 32px; font-size: 0.9rem; }
 
+    /* ═══════════════ TOAST (message temporaire en bas) ═══════════════ */
     .toast {
       position: fixed; bottom: 20px; left: 50%;
       transform: translateX(-50%) translateY(100px);
@@ -565,6 +614,7 @@
 
     .toast.show { transform: translateX(-50%) translateY(0); }
 
+    /* ═══════════════ TEXTE DE PAIEMENT EN BAS ═══════════════ */
     .payment-text {
       margin-top: 22px;
       padding: 16px 14px;
@@ -578,6 +628,7 @@
       margin-left: auto; margin-right: auto;
     }
 
+    /* ═══════════════ OVERLAY DE CONNEXION ═══════════════ */
     .login-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0, 0, 0, 0.6);
@@ -643,6 +694,7 @@
 
     .auth-btn:active { transform: scale(0.95); }
 
+    /* ═══════════════ RESPONSIVE (petits écrans) ═══════════════ */
     @media (max-width: 480px) {
       :root { --font-base: 17px; --touch-size: 44px; }
       .header h1 { font-size: 1.6rem; }
@@ -686,6 +738,7 @@
 </head>
 <body>
 
+<!-- ═══════════════ OVERLAY DE CONNEXION (affiché si non connecté) ═══════════════ -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <h2>Connexion sécurisée</h2>
@@ -702,8 +755,10 @@
   </div>
 </div>
 
+<!-- ═══════════════ CONTENU PRINCIPAL ═══════════════ -->
 <div class="content">
 
+  <!-- En-tête du site -->
   <header class="header">
     <h1>Ma Révision Médicale</h1>
     <div class="header-sub">
@@ -713,6 +768,7 @@
     </div>
   </header>
 
+  <!-- Carte de félicitations affichée à la fin des examens -->
   <div class="congrats-card" id="congratsCard">
     <div class="congrats-emoji">🎓🎉</div>
     <div class="congrats-title">Bravo Piso !</div>
@@ -723,11 +779,13 @@
     <div class="congrats-signature">— Repose-toi bien, tu l'as mérité —</div>
   </div>
 
+  <!-- Message d'encouragement dynamique -->
   <div class="daily-message" id="dailyMessage">
     <div class="daily-message-icon" id="dailyMessageIcon">🌿</div>
     <p id="dailyMessageText"></p>
   </div>
 
+  <!-- Calendrier des examens (5 → 19 octobre) -->
   <div class="day-grid-card">
     <div class="day-grid-head">
       <span class="day-grid-title" id="dayGridTitle">Examens · 5 → 19 octobre</span>
@@ -736,13 +794,15 @@
     <div class="day-grid" id="dayGrid"></div>
   </div>
 
+  <!-- Statistiques : Tout / Fini / Pas finis / Relus -->
   <div class="stats-row">
-    <div class="stat-card total"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total</div></div>
-    <div class="stat-card done"><div class="stat-num" id="statDone">0</div><div class="stat-label">Révisés</div></div>
-    <div class="stat-card left"><div class="stat-num" id="statLeft">0</div><div class="stat-label">Restants</div></div>
+    <div class="stat-card total"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Tout</div></div>
+    <div class="stat-card done"><div class="stat-num" id="statDone">0</div><div class="stat-label">Fini</div></div>
+    <div class="stat-card left"><div class="stat-num" id="statLeft">0</div><div class="stat-label">Pas finis</div></div>
     <div class="stat-card reread"><div class="stat-num" id="statRead2">0</div><div class="stat-label">Relus</div></div>
   </div>
 
+  <!-- Carte "Ajouter un chapitre" -->
   <div class="add-card">
     <div class="add-toggle" id="addToggle">
       <div class="icon-wrap">+</div>
@@ -763,6 +823,7 @@
     </div>
   </div>
 
+  <!-- Carte "Gérer les thèmes" -->
   <div class="add-card">
     <div class="add-toggle" id="themeToggle">
       <div class="icon-wrap">+</div>
@@ -779,28 +840,36 @@
     </div>
   </div>
 
+  <!-- Barre de recherche -->
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
     <input type="text" id="searchInput" placeholder="Rechercher un chapitre ou un thème…" />
   </div>
 
+  <!-- Filtres -->
   <div class="filter-tabs">
     <button class="filter-tab active" data-filter="all">Tous</button>
     <button class="filter-tab" data-filter="toread">Pas encore relus</button>
     <button class="filter-tab" data-filter="read">Relus</button>
   </div>
 
+  <!-- Liste des chapitres (générée dynamiquement) -->
   <div id="chapterList"></div>
 
+  <!-- Mention paiement -->
   <div class="payment-text">
     💝 Versement du paiement à hauteur de 150€ en Novembre.
   </div>
 
 </div>
 
+<!-- Toast (message temporaire) -->
 <div class="toast" id="toast"></div>
 
 <script>
+  /* ═════════════════════════════════════════════════════════════════════
+     CONFIGURATION FIREBASE
+     ═════════════════════════════════════════════════════════════════════ */
   const firebaseConfig = {
     apiKey: "AIzaSyBWhVrKgFLE0Y73FkI9sEo_an-cGRUQLWo",
     authDomain: "bdsiterevisionmed4a.firebaseapp.com",
@@ -816,19 +885,23 @@
   const auth = firebase.auth();
   const database = firebase.database();
 
-  /* ⬇️ Période d'examens : du 5 au 19 octobre 2026 */
-  const EXAM_START = new Date(2026, 9, 5, 0, 0, 0);
-  const EXAM_END = new Date(2026, 9, 19, 0, 0, 0);
+  /* ═════════════════════════════════════════════════════════════════════
+     CONSTANTES GLOBALES
+     ═════════════════════════════════════════════════════════════════════ */
 
+  /* Période d'examens : du 5 au 19 octobre 2026 (mois 9 = octobre) */
+  const EXAM_START = new Date(2026, 9, 5, 0, 0, 0);
+  const EXAM_END   = new Date(2026, 9, 19, 0, 0, 0);
+
+  /* Durée d'une demi-journée (utilisée pour changer les messages toutes les 12h) */
   const HALF_DAY_MS = 12 * 60 * 60 * 1000;
 
-  /* ═══════════════════════════════════════════════════════════════════
+  /* ═════════════════════════════════════════════════════════════════════
      MESSAGES D'ENCOURAGEMENT PERSONNALISÉS POUR PISO
-     2 messages par jour (matin / après-midi), uniques chaque jour.
-     Samedis (10 & 17 oct.) et dimanches (11 & 18 oct.) = REPOS.
-     ═══════════════════════════════════════════════════════════════════ */
+     (3 phases : avant / pendant / après les examens)
+     ═════════════════════════════════════════════════════════════════════ */
 
-  /* Messages AVANT le début des examens (préparation) */
+  /* ---------- Messages AVANT les examens (préparation) ---------- */
   const PRE_EXAM_MESSAGES = [
     { i: "🌿", t: "Piso, tu avances un chapitre à la fois. Doucement mais sûrement." },
     { i: "☀️", t: "Piso, chaque page lue aujourd'hui est une victoire tranquille." },
@@ -856,87 +929,58 @@
     { i: "🎯", t: "Piso, objectif : 5 octobre 2026. Tu y arriveras." }
   ];
 
-  /* Messages PENDANT les examens — 15 jours × 2 messages = 30 messages.
-     Index = nb de jours depuis le 5 octobre (0 → 14). */
+  /* ---------- Messages PENDANT les examens (30 messages uniques) ----------
+     Index 0 → J1 (lundi 5 octobre)  ...  Index 14 → J15 (lundi 19 octobre)
+     - 5 messages par phase (J1→J5 puis J8→J12 puis J15) + weekends repos (J6, J7, J13, J14) */
   const EXAM_MESSAGES = [
-    /* J1 — Lundi 5 octobre (Début des examens) */
-    {
-      morning:   { i: "🌅", t: "Piso, le grand jour est arrivé. Respire un bon coup, tu es prête." },
-      afternoon: { i: "💪", t: "Premier examen terminé Piso ! Un poids en moins, continue comme ça." }
-    },
+    /* J1 — Lundi 5 octobre : début des examens */
+    { morning:   { i: "🌅", t: "Piso, le grand jour est arrivé. Respire un bon coup, tu es prête." },
+      afternoon: { i: "💪", t: "Premier examen terminé Piso ! Un poids en moins, continue comme ça." } },
     /* J2 — Mardi 6 octobre */
-    {
-      morning:   { i: "☀️", t: "Nouvelle journée Piso, nouvelle chance de briller. Fais-toi confiance." },
-      afternoon: { i: "🌙", t: "Tu tiens le rythme Piso, c'est impressionnant. Repose-toi bien ce soir." }
-    },
+    { morning:   { i: "☀️", t: "Nouvelle journée Piso, nouvelle chance de briller. Fais-toi confiance." },
+      afternoon: { i: "🌙", t: "Tu tiens le rythme Piso, c'est impressionnant. Repose-toi bien ce soir." } },
     /* J3 — Mercredi 7 octobre */
-    {
-      morning:   { i: "🌱", t: "Piso, chaque épreuve te rend plus forte. Tu vas y arriver." },
-      afternoon: { i: "✨", t: "Mi-semaine Piso, tu avances à merveille. Sois fière de toi." }
-    },
+    { morning:   { i: "🌱", t: "Piso, chaque épreuve te rend plus forte. Tu vas y arriver." },
+      afternoon: { i: "✨", t: "Mi-semaine Piso, tu avances à merveille. Sois fière de toi." } },
     /* J4 — Jeudi 8 octobre */
-    {
-      morning:   { i: "💛", t: "Bonjour Piso, respire, souris, tu connais ton sujet." },
-      afternoon: { i: "🎀", t: "Encore une journée de gagnée Piso, tu gères super bien." }
-    },
+    { morning:   { i: "💛", t: "Bonjour Piso, respire, souris, tu connais ton sujet." },
+      afternoon: { i: "🎀", t: "Encore une journée de gagnée Piso, tu gères super bien." } },
     /* J5 — Vendredi 9 octobre */
-    {
-      morning:   { i: "🔥", t: "Piso, dernière ligne droite avant le week-end. Donne tout !" },
-      afternoon: { i: "🌸", t: "Bravo Piso, semaine bien entamée. Le repos arrive bientôt." }
-    },
+    { morning:   { i: "🔥", t: "Piso, dernière ligne droite avant le week-end. Donne tout !" },
+      afternoon: { i: "🌸", t: "Bravo Piso, semaine bien entamée. Le repos arrive bientôt." } },
     /* J6 — Samedi 10 octobre (REPOS) */
-    {
-      morning:   { i: "🛌", t: "Piso, aujourd'hui c'est repos ! Dors, respire, fais-toi du bien." },
-      afternoon: { i: "🧸", t: "Prends soin de toi Piso, tu l'as bien mérité. Petite révision si envie." }
-    },
+    { morning:   { i: "🛌", t: "Piso, aujourd'hui c'est repos ! Dors, respire, fais-toi du bien." },
+      afternoon: { i: "🧸", t: "Prends soin de toi Piso, tu l'as bien mérité. Petite révision si envie." } },
     /* J7 — Dimanche 11 octobre (REPOS) */
-    {
-      morning:   { i: "🕊️", t: "Dimanche doux pour toi Piso. Repose ton esprit, il travaille dur." },
-      afternoon: { i: "🌙", t: "Piso, une petite relecture tranquille et hop, au lit tôt." }
-    },
+    { morning:   { i: "🕊️", t: "Dimanche doux pour toi Piso. Repose ton esprit, il travaille dur." },
+      afternoon: { i: "🌙", t: "Piso, une petite relecture tranquille et hop, au lit tôt." } },
     /* J8 — Lundi 12 octobre */
-    {
-      morning:   { i: "🚀", t: "Nouvelle semaine Piso, tu repars avec la pêche !" },
-      afternoon: { i: "👑", t: "Piso, tu gères cette semaine comme une cheffe. Continue !" }
-    },
+    { morning:   { i: "🚀", t: "Nouvelle semaine Piso, tu repars avec la pêche !" },
+      afternoon: { i: "👑", t: "Piso, tu gères cette semaine comme une cheffe. Continue !" } },
     /* J9 — Mardi 13 octobre */
-    {
-      morning:   { i: "🌟", t: "Courage Piso, tu es plus qu'à mi-parcours. La fin se rapproche." },
-      afternoon: { i: "💗", t: "Piso, tu es une warrior. Chaque épreuve te rapproche du but." }
-    },
+    { morning:   { i: "🌟", t: "Courage Piso, tu es plus qu'à mi-parcours. La fin se rapproche." },
+      afternoon: { i: "💗", t: "Piso, tu es une warrior. Chaque épreuve te rapproche du but." } },
     /* J10 — Mercredi 14 octobre */
-    {
-      morning:   { i: "🔆", t: "Bonjour Piso, la lumière au bout du tunnel se voit déjà." },
-      afternoon: { i: "🌿", t: "Tu tiens bon Piso, c'est admirable. Repose-toi bien ce soir." }
-    },
+    { morning:   { i: "🔆", t: "Bonjour Piso, la lumière au bout du tunnel se voit déjà." },
+      afternoon: { i: "🌿", t: "Tu tiens bon Piso, c'est admirable. Repose-toi bien ce soir." } },
     /* J11 — Jeudi 15 octobre */
-    {
-      morning:   { i: "🎯", t: "Piso, encore quelques jours et c'est fini. Tu peux le faire." },
-      afternoon: { i: "⭐", t: "Chaque heure qui passe Piso, c'est une heure de gagnée. Bravo." }
-    },
+    { morning:   { i: "🎯", t: "Piso, encore quelques jours et c'est fini. Tu peux le faire." },
+      afternoon: { i: "⭐", t: "Chaque heure qui passe Piso, c'est une heure de gagnée. Bravo." } },
     /* J12 — Vendredi 16 octobre */
-    {
-      morning:   { i: "🎈", t: "Dernier vendredi d'examens Piso, le week-end t'attend." },
-      afternoon: { i: "🌈", t: "Piso, tu approches de la fin. Sois fière du chemin parcouru." }
-    },
+    { morning:   { i: "🎈", t: "Dernier vendredi d'examens Piso, le week-end t'attend." },
+      afternoon: { i: "🌈", t: "Piso, tu approches de la fin. Sois fière du chemin parcouru." } },
     /* J13 — Samedi 17 octobre (REPOS) */
-    {
-      morning:   { i: "🍃", t: "Repos bien mérité Piso ! Écoute ton corps, il a besoin de pause." },
-      afternoon: { i: "🧘‍♀️", t: "Piso, une journée pour toi. Petite révision, gros dodo." }
-    },
+    { morning:   { i: "🍃", t: "Repos bien mérité Piso ! Écoute ton corps, il a besoin de pause." },
+      afternoon: { i: "🧘‍♀️", t: "Piso, une journée pour toi. Petite révision, gros dodo." } },
     /* J14 — Dimanche 18 octobre (REPOS) */
-    {
-      morning:   { i: "🛋️", t: "Dimanche tranquille Piso, demain c'est le dernier ! Repose-toi." },
-      afternoon: { i: "🌙", t: "Dernière ligne droite Piso. Une bonne nuit et c'est parti." }
-    },
-    /* J15 — Lundi 19 octobre (DERNIER JOUR) */
-    {
-      morning:   { i: "🎉", t: "Piso, c'est le dernier jour ! Donne tout, c'est la fin." },
-      afternoon: { i: "🎓", t: "C'EST FINI PISO ! Tu l'as fait ! Bravo mille fois ! 🎉" }
-    }
+    { morning:   { i: "🛋️", t: "Dimanche tranquille Piso, demain c'est le dernier ! Repose-toi." },
+      afternoon: { i: "🌙", t: "Dernière ligne droite Piso. Une bonne nuit et c'est parti." } },
+    /* J15 — Lundi 19 octobre : dernier jour */
+    { morning:   { i: "🎉", t: "Piso, c'est le dernier jour ! Donne tout, c'est la fin." },
+      afternoon: { i: "🎓", t: "C'EST FINI PISO ! Tu l'as fait ! Bravo mille fois ! 🎉" } }
   ];
 
-  /* Messages APRÈS les examens (rotatif) */
+  /* ---------- Messages APRÈS les examens (rotation) ---------- */
   const POST_EXAM_MESSAGES = [
     { i: "🎓", t: "Piso, tu as tout terminé ! Repose-toi bien, tu l'as amplement mérité. 💛" },
     { i: "🌸", t: "Piso, savoure cette liberté retrouvée. Tu peux être immensément fière de toi." },
@@ -946,14 +990,21 @@
     { i: "🎀", t: "Piso, tu as tout donné. Maintenant, c'est à toi de te chouchouter." }
   ];
 
-  let chapters = [];
-  let themes = [];
-  let examDoneThemes = [];
-  let user = null;
-  let dataListener = null;
-  let lastGridDayKey = '';
+  /* ═════════════════════════════════════════════════════════════════════
+     ÉTAT GLOBAL DE L'APPLICATION
+     ═════════════════════════════════════════════════════════════════════ */
+  let chapters = [];                 /* Tableau des chapitres (depuis Firebase) */
+  let themes = [];                   /* Liste des thèmes personnalisés */
+  let examDoneThemes = [];           /* Thèmes dont l'examen est marqué terminé */
+  let collapsedThemes = [];          /* Thèmes repliés manuellement (état local, non persistant) */
+  let user = null;                   /* Utilisateur Firebase courant */
+  let dataListener = null;           /* Référence du listener Firebase temps réel */
+  let lastGridDayKey = '';           /* Dernière date rendue dans le calendrier (pour reset minuit) */
 
+  /* Raccourci pratique : document.getElementById */
   const $ = (id) => document.getElementById(id);
+
+  /* Cache des éléments DOM fréquemment utilisés */
   const elements = {
     statTotal: $('statTotal'),
     statDone: $('statDone'),
@@ -989,12 +1040,18 @@
     congratsCard: $('congratsCard')
   };
 
+  /* ═════════════════════════════════════════════════════════════════════
+     FONCTIONS UTILITAIRES
+     ═════════════════════════════════════════════════════════════════════ */
+
+  /* Échappe le HTML pour éviter les injections dans le rendu */
   function escapeHtml(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[c]));
   }
 
+  /* Affiche un message temporaire (toast) pendant 4 secondes */
   function showToast(message) {
     const toast = elements.toast;
     toast.textContent = message;
@@ -1003,35 +1060,54 @@
     toast._timer = setTimeout(() => toast.classList.remove('show'), 4000);
   }
 
-  /* ⬇️ Sélectionne le message d'encouragement selon :
-     - la phase (avant / pendant / après les examens)
-     - le jour d'examen précis (de J1 à J15)
-     - le moment de la journée (matin < 12h / après-midi ≥ 12h) */
+  /* Renvoie une clé de date locale unique "YYYY-M-D" (pour comparaison de jours) */
+  function dateKey(d) {
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  }
+
+  /* Renvoie la date à minuit (début de journée) */
+  function startOfDay(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  /* Nombre de jours entiers entre deux dates (arrondi) */
+  function diffDays(from, to) {
+    return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / 86400000);
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     MESSAGE D'ENCOURAGEMENT DYNAMIQUE
+     Détermine le message à afficher selon :
+       - la phase (avant / pendant / après les examens),
+       - le jour précis (J1 à J15),
+       - le moment de la journée (matin < 12h / après-midi ≥ 12h).
+     ═════════════════════════════════════════════════════════════════════ */
   function displayEncouragement() {
     const now = new Date();
     const today = startOfDay(now);
     const examStart = startOfDay(EXAM_START);
     const examEnd = startOfDay(EXAM_END);
 
-    const dayOffset = Math.round(
-      (today.getTime() - examStart.getTime()) / 86400000
-    );
+    /* Nombre de jours écoulés depuis le début des examens (0 = J1) */
+    const dayOffset = Math.round((today.getTime() - examStart.getTime()) / 86400000);
     const isMorning = now.getHours() < 12;
 
     let item;
 
     if (today.getTime() < examStart.getTime()) {
-      /* AVANT les examens — rotation libre toutes les 12h */
+      /* --- Phase AVANT les examens --- */
       const idx = Math.floor(Date.now() / HALF_DAY_MS) % PRE_EXAM_MESSAGES.length;
       item = PRE_EXAM_MESSAGES[idx];
-    } else if (today.getTime() <= examEnd.getTime()
-               && dayOffset >= 0
-               && dayOffset < EXAM_MESSAGES.length) {
-      /* PENDANT les examens — message du jour + matin/après-midi */
+    } else if (
+      today.getTime() <= examEnd.getTime() &&
+      dayOffset >= 0 &&
+      dayOffset < EXAM_MESSAGES.length
+    ) {
+      /* --- Phase PENDANT les examens --- */
       const dayMsgs = EXAM_MESSAGES[dayOffset];
       item = isMorning ? dayMsgs.morning : dayMsgs.afternoon;
     } else {
-      /* APRÈS les examens — rotation libre */
+      /* --- Phase APRÈS les examens --- */
       const idx = Math.floor(Date.now() / HALF_DAY_MS) % POST_EXAM_MESSAGES.length;
       item = POST_EXAM_MESSAGES[idx];
     }
@@ -1040,23 +1116,18 @@
     elements.dailyMessageText.textContent = item.t;
   }
 
-  function dateKey(d) {
-    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-  }
-
-  function startOfDay(d) {
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  }
-
-  function diffDays(from, to) {
-    return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / 86400000);
-  }
-
+  /* ═════════════════════════════════════════════════════════════════════
+     CARTE DE FÉLICITATIONS
+     Affichée SI :
+       - la date dépasse le 19 octobre (fin des examens), OU
+       - tous les thèmes existants sont marqués "examen terminé".
+     ═════════════════════════════════════════════════════════════════════ */
   function updateCongratsCard() {
     const today = startOfDay(new Date());
     const examEnd = startOfDay(EXAM_END);
     const dateOver = today.getTime() > examEnd.getTime();
 
+    /* Uniquement les thèmes utilisés par au moins un chapitre */
     const chapterThemes = [...new Set(chapters.map((c) => c.theme).filter(Boolean))];
     const allThemesChecked =
       chapterThemes.length > 0 &&
@@ -1069,13 +1140,21 @@
     }
   }
 
+  /* ═════════════════════════════════════════════════════════════════════
+     CALENDRIER DES EXAMENS (5 → 19 octobre)
+     - Jours passés  : fond vert foncé (mise en valeur)
+     - Aujourd'hui   : fond vert + animation
+     - Jours futurs  : fond blanc clair (non mis en valeur)
+     ═════════════════════════════════════════════════════════════════════ */
   function renderDayGrid() {
     const today = startOfDay(new Date());
     const examStart = startOfDay(EXAM_START);
     const examEnd = startOfDay(EXAM_END);
 
+    /* Mémorise le jour courant pour détecter le passage à minuit */
     lastGridDayKey = dateKey(today);
 
+    /* Titre dynamique */
     if (today.getTime() < examStart.getTime()) {
       elements.dayGridTitle.textContent = "Examens à venir · 5 → 19 octobre";
     } else if (today.getTime() > examEnd.getTime()) {
@@ -1084,6 +1163,7 @@
       elements.dayGridTitle.textContent = "Examens en cours · 5 → 19 octobre";
     }
 
+    /* Compteur de jours restants */
     let countText;
     if (today.getTime() > examEnd.getTime()) {
       countText = 'Terminé';
@@ -1096,19 +1176,21 @@
     }
     elements.dayGridCount.textContent = countText;
 
+    /* Si les examens sont finis, on affiche uniquement un message */
     if (today.getTime() > examEnd.getTime()) {
       elements.dayGrid.innerHTML = '<div class="day-grid-done">🎉 Les examens sont terminés, bravo Piso !</div>';
       return;
     }
 
+    /* Génération des cellules : du 5 au 19 octobre */
     let html = '';
     const cursor = new Date(examStart.getTime());
     while (cursor.getTime() <= examEnd.getTime()) {
       const t = cursor.getTime();
       let cls = 'day-cell';
-      if (t < today.getTime()) cls += ' past';
-      else if (t === today.getTime()) cls += ' today';
-      else cls += ' future';
+      if (t < today.getTime()) cls += ' past';          /* déjà passé */
+      else if (t === today.getTime()) cls += ' today';  /* aujourd'hui */
+      else cls += ' future';                            /* à venir */
       html += '<div class="' + cls + '">' + cursor.getDate() + '</div>';
       cursor.setDate(cursor.getDate() + 1);
     }
@@ -1116,24 +1198,39 @@
     elements.dayGrid.innerHTML = html;
   }
 
+  /* ═════════════════════════════════════════════════════════════════════
+     STATISTIQUES : Tout / Fini / Pas finis / Relus
+     (Basées sur le tableau "chapters")
+     ═════════════════════════════════════════════════════════════════════ */
   function renderStats() {
     const total = chapters.length;
-    const done = chapters.filter((ch) => ch.done).length;
-    const done2 = chapters.filter((ch) => ch.done2).length;
-    elements.statTotal.textContent = total;
-    elements.statDone.textContent = done;
-    elements.statLeft.textContent = total - done;
-    elements.statRead2.textContent = done2;
+    const done = chapters.filter((ch) => ch.done).length;      /* Chapitres révisés */
+    const done2 = chapters.filter((ch) => ch.done2).length;    /* Chapitres relus */
+
+    elements.statTotal.textContent = total;                    /* Tout */
+    elements.statDone.textContent = done;                      /* Fini */
+    elements.statLeft.textContent = total - done;              /* Pas finis */
+    elements.statRead2.textContent = done2;                    /* Relus */
   }
 
+  /* ═════════════════════════════════════════════════════════════════════
+     LISTE DES CHAPITRES (groupés par thème)
+     Inclut :
+       - une case "examen terminé" devant chaque thème,
+       - un chevron pour replier/déplier un thème,
+       - les cases "1" (révision) et "2" (relecture) devant chaque chapitre.
+     ═════════════════════════════════════════════════════════════════════ */
   function renderList() {
+    /* Récupère le filtre actif et la recherche */
     const filter = document.querySelector('.filter-tab.active')?.dataset.filter || 'all';
     const search = elements.searchInput.value.toLowerCase().trim();
 
+    /* Applique le filtre (relus / pas relus) */
     let filtered = chapters;
     if (filter === 'toread') filtered = filtered.filter((ch) => !ch.done2);
     else if (filter === 'read') filtered = filtered.filter((ch) => ch.done2);
 
+    /* Applique la recherche (nom ou thème) */
     if (search) {
       filtered = filtered.filter((ch) => {
         const name = ch.name ? ch.name.toLowerCase() : '';
@@ -1142,6 +1239,7 @@
       });
     }
 
+    /* Regroupe les chapitres par thème */
     const groups = {};
     filtered.forEach((ch) => {
       const theme = ch.theme || 'Sans thème';
@@ -1149,6 +1247,7 @@
       groups[theme].push(ch);
     });
 
+    /* Couleurs attribuées automatiquement à certains thèmes connus */
     const colorMap = {
       'Cardiologie': '#E05A5A',
       'Dermatologie': '#C4607A',
@@ -1160,8 +1259,10 @@
       'Traumatologie': '#16A085'
     };
 
+    /* Construction du HTML */
     let html = '';
     for (const [theme, items] of Object.entries(groups)) {
+      /* Stats du thème complet (indépendamment du filtre/recherche) */
       const themeAll = chapters.filter((ch) => (ch.theme || 'Sans thème') === theme);
       const doneCount = themeAll.filter((i) => i.done).length;
       const done2Count = themeAll.filter((i) => i.done2).length;
@@ -1170,21 +1271,33 @@
       const dotColor = colorMap[theme] || '#D4788A';
       const safeTheme = escapeHtml(theme);
 
+      /* État de l'examen du thème + état replié/déplié */
       const examDone = examDoneThemes.includes(theme);
       const examCheckCls = examDone ? 'checked' : '';
       const cardCls = examDone ? 'exam-done' : '';
 
+      /* Le thème est replié SI :
+         - il a été replié manuellement (collapsedThemes), OU
+         - son examen est terminé ET l'utilisateur ne l'a pas déplié manuellement.
+         Logique : quand on coche l'examen → auto-collapse (sauf si déjà déplié manuellement). */
+      const isManuallyCollapsed = collapsedThemes.includes(theme);
+      const isManuallyExpanded = expandedThemes.includes(theme);
+      const collapsed = isManuallyCollapsed || (examDone && !isManuallyExpanded);
+      const sectionCls = collapsed ? 'collapsed' : '';
+
       html += `
-        <div class="theme-section">
+        <div class="theme-section ${sectionCls}">
           <div class="theme-header">
             <div class="exam-check ${examCheckCls}" data-theme="${safeTheme}" title="Cocher quand l'examen de ce thème est terminé"></div>
             <div class="theme-dot" style="background:${dotColor}"></div>
             <span class="theme-title">${safeTheme}</span>
+            <span class="theme-toggle" data-theme="${safeTheme}" title="Replier / déplier">▾</span>
             <span class="theme-badge">✅ ${doneCount}/${totalCount}</span>
             <span class="theme-badge badge-2">🔁 ${done2Count}/${totalCount}</span>
           </div>
           <div class="theme-card ${cardCls}">`;
 
+      /* Chapitres du thème */
       items.forEach((ch) => {
         const doneClass = ch.done ? 'is-done' : '';
         const nameClass = ch.done ? 'done' : '';
@@ -1210,15 +1323,20 @@
       html += `</div></div>`;
     }
 
+    /* Message si rien à afficher */
     elements.chapterList.innerHTML = html || `
       <div class="empty" style="text-align:center;padding:30px 10px;color:var(--muted);">
         <div style="font-size:2rem;margin-bottom:8px;">📭</div>
         <p style="font-size:0.85rem;">Aucun chapitre trouvé</p>
       </div>`;
 
+    /* Réattache tous les écouteurs d'événements */
     attachChapterEvents();
   }
 
+  /* ═════════════════════════════════════════════════════════════════════
+     GESTION DES THÈMES (dans le formulaire "Gérer les thèmes")
+     ═════════════════════════════════════════════════════════════════════ */
   function renderThemeManager() {
     let html = '';
     themes.forEach((theme) => {
@@ -1235,6 +1353,7 @@
     elements.themeListContainer.innerHTML = html ||
       `<div style="font-size:0.8rem; color:var(--muted); text-align:center;">Aucun thème personnalisé.</div>`;
 
+    /* Boutons de suppression des thèmes */
     elements.themeListContainer.querySelectorAll('.btn-icon.del').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1242,12 +1361,18 @@
       });
     });
 
+    /* Met à jour la liste des suggestions (datalist) */
     elements.themeListDatalist.innerHTML = themes
       .map((t) => `<option value="${escapeHtml(t)}" />`)
       .join('');
   }
 
+  /* ═════════════════════════════════════════════════════════════════════
+     ATTACHEMENT DES ÉCOUTEURS D'ÉVÉNEMENTS SUR LA LISTE
+     (après chaque re-rendu de la liste des chapitres)
+     ═════════════════════════════════════════════════════════════════════ */
   function attachChapterEvents() {
+    /* Cases "1" et "2" (révision / relecture) */
     elements.chapterList.querySelectorAll('.custom-cb').forEach((el) => {
       el.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -1255,6 +1380,7 @@
       });
     });
 
+    /* Boutons supprimer */
     elements.chapterList.querySelectorAll('.btn-icon.del').forEach((el) => {
       el.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -1262,6 +1388,7 @@
       });
     });
 
+    /* Boutons éditer */
     elements.chapterList.querySelectorAll('.btn-icon.edit').forEach((el) => {
       el.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -1269,25 +1396,75 @@
       });
     });
 
+    /* Cases "examen terminé" devant chaque thème */
     elements.chapterList.querySelectorAll('.exam-check').forEach((el) => {
       el.addEventListener('click', function (e) {
         e.stopPropagation();
         toggleExamDone(this.dataset.theme);
       });
     });
+
+    /* Chevrons pour replier / déplier un thème (mise à jour directe du DOM,
+       pas de re-rendu complet → transition fluide) */
+    elements.chapterList.querySelectorAll('.theme-toggle').forEach((el) => {
+      el.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const theme = this.dataset.theme;
+        const section = this.closest('.theme-section');
+        if (!section) return;
+
+        /* Toggle de la classe "collapsed" sur la section */
+        const willBeCollapsed = !section.classList.contains('collapsed');
+        section.classList.toggle('collapsed', willBeCollapsed);
+
+        /* Mise à jour des états internes pour cohérence */
+        if (willBeCollapsed) {
+          if (!collapsedThemes.includes(theme)) collapsedThemes.push(theme);
+          expandedThemes = expandedThemes.filter((t) => t !== theme);
+        } else {
+          collapsedThemes = collapsedThemes.filter((t) => t !== theme);
+          if (!expandedThemes.includes(theme)) expandedThemes.push(theme);
+        }
+      });
+    });
   }
 
+  /* ═════════════════════════════════════════════════════════════════════
+     ACTIONS UTILISATEUR
+     ═════════════════════════════════════════════════════════════════════ */
+
+  /* Bascule l'état "examen terminé" d'un thème.
+     Quand on coche → le thème se replie automatiquement (sauf s'il est déjà
+     explicitement déplié par l'utilisateur). */
   function toggleExamDone(theme) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
+
     const idx = examDoneThemes.indexOf(theme);
-    if (idx >= 0) {
+    const wasChecked = idx >= 0;
+
+    if (wasChecked) {
+      /* Décoche */
       examDoneThemes.splice(idx, 1);
+      /* Le thème redevient déplié par défaut */
+      collapsedThemes = collapsedThemes.filter((t) => t !== theme);
     } else {
+      /* Coche → auto-repli sauf si déjà déplié manuellement */
       examDoneThemes.push(theme);
+      if (!expandedThemes.includes(theme)) {
+        if (!collapsedThemes.includes(theme)) collapsedThemes.push(theme);
+      }
     }
+
+    /* Sauvegarde l'état des examens cochés dans Firebase */
     database.ref('data/examThemes').set(examDoneThemes);
+
+    /* Re-rendu immédiat pour appliquer le repli sans attendre Firebase */
+    renderList();
   }
 
+  /* Bascule une case (done / done2) d'un chapitre.
+     Logique : si on coche "2" (relu), "1" est automatiquement coché.
+     Si on décoche "1" (révisé), "2" est automatiquement décoché. */
   function toggleChapterField(key, field) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
     const chapter = chapters.find((ch) => ch.key === key);
@@ -1302,26 +1479,31 @@
     database.ref('data/' + key).update(updates);
   }
 
+  /* Supprime un chapitre */
   function deleteChapter(key) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
     database.ref('data/' + key).remove();
   }
 
+  /* Modifie un chapitre (nom + thème) */
   function editChapter(key) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
     const chapter = chapters.find((ch) => ch.key === key);
     if (!chapter) return;
 
+    /* Nouveau nom */
     const newName = prompt('Nouveau nom :', chapter.name);
     if (newName === null) return;
     const trimmedName = newName.trim();
     if (!trimmedName) { alert('Le nom ne peut pas être vide.'); return; }
 
+    /* Nouveau thème */
     const newTheme = prompt('Nouveau thème :', chapter.theme);
     if (newTheme === null) return;
     const trimmedTheme = newTheme.trim();
     if (!trimmedTheme) { alert('Le thème ne peut pas être vide.'); return; }
 
+    /* Ajoute le thème s'il n'existe pas encore */
     if (!themes.includes(trimmedTheme)) {
       themes.push(trimmedTheme);
       database.ref('data/themes').set(themes);
@@ -1331,6 +1513,7 @@
     database.ref('data/' + key).update({ name: trimmedName, theme: trimmedTheme });
   }
 
+  /* Ajoute un chapitre */
   function addChapter(name, theme) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
     if (!name.trim() || !theme.trim()) { alert('Veuillez remplir tous les champs.'); return; }
@@ -1342,6 +1525,7 @@
       renderThemeManager();
     }
 
+    /* Crée une nouvelle entrée dans Firebase */
     const newRef = database.ref('data').push();
     newRef.set({
       name: name.trim(),
@@ -1350,12 +1534,14 @@
       done2: false
     });
 
+    /* Réinitialise et referme le formulaire */
     elements.chapterName.value = '';
     elements.chapterTheme.value = '';
     elements.addForm.classList.remove('open');
     elements.addToggle.classList.remove('open');
   }
 
+  /* Ajoute un thème personnalisé */
   function addTheme(name) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
     const trimmed = name.trim();
@@ -1368,9 +1554,11 @@
     showToast('Thème "' + trimmed + '" ajouté.');
   }
 
+  /* Supprime un thème + retire son éventuel statut "examen terminé" */
   function deleteTheme(theme) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
     if (!confirm('Supprimer le thème "' + theme + '" ?')) return;
+
     themes = themes.filter((t) => t !== theme);
     database.ref('data/themes').set(themes);
 
@@ -1379,18 +1567,28 @@
       database.ref('data/examThemes').set(examDoneThemes);
     }
 
+    /* Nettoyage local */
+    collapsedThemes = collapsedThemes.filter((t) => t !== theme);
+
     renderThemeManager();
   }
 
+  /* ═════════════════════════════════════════════════════════════════════
+     GESTION DE L'AUTHENTIFICATION / AFFICHAGE
+     ═════════════════════════════════════════════════════════════════════ */
   function updateAuthUI() {
     if (user) {
+      /* --- Utilisateur connecté --- */
       elements.authStatus.textContent = 'Connecté';
       elements.logoutBtn.style.display = 'inline-block';
       elements.loginOverlay.classList.remove('login-overlay--visible');
 
+      /* Écoute temps réel des données Firebase (une seule fois) */
       if (!dataListener) {
         dataListener = database.ref('data').on('value', (snapshot) => {
           const data = snapshot.val() || {};
+
+          /* Clés spéciales à exclure des chapitres */
           const chapterKeys = Object.keys(data).filter(
             (key) => key !== 'themes' && key !== 'examThemes'
           );
@@ -1399,6 +1597,7 @@
           themes = Array.isArray(data.themes) ? data.themes.slice() : [];
           examDoneThemes = Array.isArray(data.examThemes) ? data.examThemes.slice() : [];
 
+          /* Sync auto des thèmes : ajoute ceux présents dans les chapitres */
           const chapterThemes = [...new Set(chapters.map((ch) => ch.theme).filter(Boolean))];
           let needUpdate = false;
           chapterThemes.forEach((ct) => {
@@ -1406,6 +1605,7 @@
           });
           if (needUpdate) database.ref('data/themes').set(themes);
 
+          /* Re-rendu complet */
           renderStats();
           renderList();
           renderThemeManager();
@@ -1416,18 +1616,22 @@
         });
       }
     } else {
+      /* --- Utilisateur déconnecté --- */
       elements.authStatus.textContent = 'Déconnecté';
       elements.logoutBtn.style.display = 'none';
       elements.loginOverlay.classList.add('login-overlay--visible');
 
+      /* Retire le listener Firebase */
       if (dataListener) {
         database.ref('data').off('value', dataListener);
         dataListener = null;
       }
 
+      /* Réinitialise l'état local */
       chapters = [];
       themes = [];
       examDoneThemes = [];
+      collapsedThemes = [];
       renderStats();
       renderList();
       renderThemeManager();
@@ -1435,6 +1639,11 @@
     }
   }
 
+  /* ═════════════════════════════════════════════════════════════════════
+     ÉCOUTEURS D'ÉVÉNEMENTS GLOBAUX
+     ═════════════════════════════════════════════════════════════════════ */
+
+  /* Connexion */
   elements.loginBtn.addEventListener('click', async function () {
     const email = elements.loginEmail.value.trim();
     const password = elements.loginPassword.value;
@@ -1456,41 +1665,51 @@
     }
   });
 
+  /* Déconnexion */
   elements.logoutBtn.addEventListener('click', async function () {
     await auth.signOut();
   });
 
+  /* Changement d'état d'authentification */
   auth.onAuthStateChanged((firebaseUser) => {
     user = firebaseUser;
     updateAuthUI();
   });
 
+  /* Validation par touche Entrée sur les champs de connexion */
   elements.loginEmail.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.loginBtn.click(); });
   elements.loginPassword.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.loginBtn.click(); });
 
+  /* Ouverture/fermeture du formulaire "Ajouter un chapitre" */
   elements.addToggle.addEventListener('click', () => {
     elements.addForm.classList.toggle('open');
     elements.addToggle.classList.toggle('open');
   });
 
+  /* Bouton "Ajouter le chapitre" */
   elements.addChapterBtn.addEventListener('click', () => {
     addChapter(elements.chapterName.value, elements.chapterTheme.value);
   });
 
+  /* Entrée = clic sur le bouton dans les champs d'ajout de chapitre */
   elements.chapterName.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.addChapterBtn.click(); });
   elements.chapterTheme.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.addChapterBtn.click(); });
 
+  /* Ouverture/fermeture du formulaire "Gérer les thèmes" */
   elements.themeToggle.addEventListener('click', () => {
     elements.themeForm.classList.toggle('open');
     elements.themeToggle.classList.toggle('open');
   });
 
+  /* Bouton "Ajouter le thème" */
   elements.addThemeBtn.addEventListener('click', () => {
     addTheme(elements.newThemeName.value);
   });
 
+  /* Entrée = clic sur le bouton dans le champ d'ajout de thème */
   elements.newThemeName.addEventListener('keypress', (e) => { if (e.key === 'Enter') elements.addThemeBtn.click(); });
 
+  /* Onglets de filtre */
   elements.filterTabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       elements.filterTabs.forEach((t) => t.classList.remove('active'));
@@ -1499,11 +1718,19 @@
     });
   });
 
+  /* Recherche en temps réel */
   elements.searchInput.addEventListener('input', renderList);
 
+  /* ═════════════════════════════════════════════════════════════════════
+     INITIALISATION AU CHARGEMENT DE LA PAGE
+     ═════════════════════════════════════════════════════════════════════ */
+
+  /* Affichage du premier message + rafraîchissement toutes les minutes */
   displayEncouragement();
   setInterval(displayEncouragement, 60000);
 
+  /* Calendrier + carte félicitations, rafraîchis toutes les minutes
+     (pour détecter le passage à minuit) */
   renderDayGrid();
   updateCongratsCard();
   setInterval(() => {
@@ -1515,6 +1742,7 @@
     }
   }, 60000);
 
+  /* Premier rendu (seront re-rendus après la connexion Firebase) */
   renderStats();
   renderList();
   renderThemeManager();
