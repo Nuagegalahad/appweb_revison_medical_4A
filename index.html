@@ -117,7 +117,6 @@
       color: var(--navy); margin: 0; line-height: 1.4; word-break: break-word;
     }
 
-    /* ⬇️ Carte de félicitations (visible uniquement à la fin des examens) */
     .congrats-card {
       display: none;
       background: linear-gradient(145deg, #FFF0F5, #FFE4EC);
@@ -413,7 +412,6 @@
       letter-spacing: 0.03em; word-break: break-word;
     }
 
-    /* ⬇️ Case à cocher devant chaque thème (examen du thème terminé) */
     .exam-check {
       width: 28px; height: 28px; border-radius: 50%;
       border: 2px dashed var(--border); background: white;
@@ -715,7 +713,6 @@
     </div>
   </header>
 
-  <!-- ⬇️ Carte de félicitations (affichée uniquement à la fin des examens) -->
   <div class="congrats-card" id="congratsCard">
     <div class="congrats-emoji">🎓🎉</div>
     <div class="congrats-title">Bravo Piso !</div>
@@ -825,37 +822,133 @@
 
   const HALF_DAY_MS = 12 * 60 * 60 * 1000;
 
-  /* ⬇️ Messages d'encouragement pour les EXAMENS */
-  const ENCOURAGEMENTS = [
-    { i: "🌿", t: "Tu as tout donné pour en arriver là. Fais-toi confiance." },
-    { i: "☀️", t: "Respire un bon coup, tu connais ton sujet." },
-    { i: "💪", t: "Piso, tu es plus forte que n'importe quel examen." },
-    { i: "🌸", t: "C'est normal d'avoir peur, mais tu vas y arriver." },
-    { i: "📚", t: "Chaque question est une occasion de montrer ce que tu sais." },
-    { i: "🫶", t: "Tu fais de ton mieux, et c'est déjà énorme." },
-    { i: "🌙", t: "Dors bien avant l'épreuve, ton cerveau a besoin de repos." },
-    { i: "✨", t: "Tu as révisé, fais maintenant confiance à ta mémoire." },
-    { i: "🌱", t: "Chaque examen passé te rapproche de la fin." },
-    { i: "🍀", t: "Respire. Tu es exactement là où tu dois être." },
-    { i: "💛", t: "Je crois en toi, Piso. Vraiment." },
-    { i: "🎈", t: "Un examen à la fois, une question à la fois." },
-    { i: "🌻", t: "Les efforts de ces mois vont payer, tu verras." },
-    { i: "🧸", t: "Sois aussi douce avec toi que tu l'es avec les autres." },
-    { i: "🔆", t: "Tu es capable de grandes choses, une épreuve à la fois." },
-    { i: "🌊", t: "Laisse le stress passer, comme une vague." },
-    { i: "🕊️", t: "Un jour à la fois, un examen à la fois." },
-    { i: "🍃", t: "Ta patience finira par payer, tu verras." },
-    { i: "⭐", t: "Tu es sur le bon chemin, continue comme ça." },
-    { i: "🎀", t: "Bravo pour tout ce que tu as déjà accompli, Piso." },
-    { i: "🌈", t: "Après l'effort vient toujours la lumière." },
-    { i: "💗", t: "Tu mérites de réussir, et tu vas y arriver." },
-    { i: "🧠", t: "Tout ce que tu as appris est là, dans ta tête." },
-    { i: "🎯", t: "Objectif : 19 octobre 2026. Tu y arriveras." }
+  /* ═══════════════════════════════════════════════════════════════════
+     MESSAGES D'ENCOURAGEMENT PERSONNALISÉS POUR PISO
+     2 messages par jour (matin / après-midi), uniques chaque jour.
+     Samedis (10 & 17 oct.) et dimanches (11 & 18 oct.) = REPOS.
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Messages AVANT le début des examens (préparation) */
+  const PRE_EXAM_MESSAGES = [
+    { i: "🌿", t: "Piso, tu avances un chapitre à la fois. Doucement mais sûrement." },
+    { i: "☀️", t: "Piso, chaque page lue aujourd'hui est une victoire tranquille." },
+    { i: "💪", t: "Piso, tu es plus forte que tu ne le penses. Vraiment." },
+    { i: "🌸", t: "Piso, prends ton temps, tu n'as rien à prouver à personne." },
+    { i: "📚", t: "Piso, un petit pas aujourd'hui vaut mieux qu'un grand demain." },
+    { i: "🫶", t: "Piso, tu fais de ton mieux, et c'est déjà énorme." },
+    { i: "🌙", t: "Piso, repose-toi quand il faut, tu reviendras plus forte." },
+    { i: "✨", t: "Piso, ta régularité vaut tous les talents du monde." },
+    { i: "🌱", t: "Piso, chaque révision fait pousser un peu plus ta confiance." },
+    { i: "🍀", t: "Piso, respire. Tu es exactement là où tu dois être." },
+    { i: "💛", t: "Piso, je crois en toi. Vraiment, du fond du cœur." },
+    { i: "🎈", t: "Piso, un chapitre coché et tu peux être fière de toi." },
+    { i: "🌻", t: "Piso, les efforts d'aujourd'hui seront ta réussite de demain." },
+    { i: "🧸", t: "Piso, sois aussi douce avec toi que tu l'es avec les autres." },
+    { i: "🔆", t: "Piso, tu es capable de grandes choses, une page à la fois." },
+    { i: "🌊", t: "Piso, laisse les choses avancer à leur rythme, sans pression." },
+    { i: "🕊️", t: "Piso, un jour à la fois, un objectif à la fois." },
+    { i: "🍃", t: "Piso, ta patience finira par payer, tu verras." },
+    { i: "⭐", t: "Piso, tu es sur le bon chemin, continue comme ça." },
+    { i: "🎀", t: "Piso, bravo pour tout ce que tu as déjà accompli." },
+    { i: "🌈", t: "Piso, après l'effort vient toujours la lumière." },
+    { i: "💗", t: "Piso, tu mérites de réussir, et tu vas y arriver." },
+    { i: "🧠", t: "Piso, chaque relecture rend ton savoir plus solide." },
+    { i: "🎯", t: "Piso, objectif : 5 octobre 2026. Tu y arriveras." }
+  ];
+
+  /* Messages PENDANT les examens — 15 jours × 2 messages = 30 messages.
+     Index = nb de jours depuis le 5 octobre (0 → 14). */
+  const EXAM_MESSAGES = [
+    /* J1 — Lundi 5 octobre (Début des examens) */
+    {
+      morning:   { i: "🌅", t: "Piso, le grand jour est arrivé. Respire un bon coup, tu es prête." },
+      afternoon: { i: "💪", t: "Premier examen terminé Piso ! Un poids en moins, continue comme ça." }
+    },
+    /* J2 — Mardi 6 octobre */
+    {
+      morning:   { i: "☀️", t: "Nouvelle journée Piso, nouvelle chance de briller. Fais-toi confiance." },
+      afternoon: { i: "🌙", t: "Tu tiens le rythme Piso, c'est impressionnant. Repose-toi bien ce soir." }
+    },
+    /* J3 — Mercredi 7 octobre */
+    {
+      morning:   { i: "🌱", t: "Piso, chaque épreuve te rend plus forte. Tu vas y arriver." },
+      afternoon: { i: "✨", t: "Mi-semaine Piso, tu avances à merveille. Sois fière de toi." }
+    },
+    /* J4 — Jeudi 8 octobre */
+    {
+      morning:   { i: "💛", t: "Bonjour Piso, respire, souris, tu connais ton sujet." },
+      afternoon: { i: "🎀", t: "Encore une journée de gagnée Piso, tu gères super bien." }
+    },
+    /* J5 — Vendredi 9 octobre */
+    {
+      morning:   { i: "🔥", t: "Piso, dernière ligne droite avant le week-end. Donne tout !" },
+      afternoon: { i: "🌸", t: "Bravo Piso, semaine bien entamée. Le repos arrive bientôt." }
+    },
+    /* J6 — Samedi 10 octobre (REPOS) */
+    {
+      morning:   { i: "🛌", t: "Piso, aujourd'hui c'est repos ! Dors, respire, fais-toi du bien." },
+      afternoon: { i: "🧸", t: "Prends soin de toi Piso, tu l'as bien mérité. Petite révision si envie." }
+    },
+    /* J7 — Dimanche 11 octobre (REPOS) */
+    {
+      morning:   { i: "🕊️", t: "Dimanche doux pour toi Piso. Repose ton esprit, il travaille dur." },
+      afternoon: { i: "🌙", t: "Piso, une petite relecture tranquille et hop, au lit tôt." }
+    },
+    /* J8 — Lundi 12 octobre */
+    {
+      morning:   { i: "🚀", t: "Nouvelle semaine Piso, tu repars avec la pêche !" },
+      afternoon: { i: "👑", t: "Piso, tu gères cette semaine comme une cheffe. Continue !" }
+    },
+    /* J9 — Mardi 13 octobre */
+    {
+      morning:   { i: "🌟", t: "Courage Piso, tu es plus qu'à mi-parcours. La fin se rapproche." },
+      afternoon: { i: "💗", t: "Piso, tu es une warrior. Chaque épreuve te rapproche du but." }
+    },
+    /* J10 — Mercredi 14 octobre */
+    {
+      morning:   { i: "🔆", t: "Bonjour Piso, la lumière au bout du tunnel se voit déjà." },
+      afternoon: { i: "🌿", t: "Tu tiens bon Piso, c'est admirable. Repose-toi bien ce soir." }
+    },
+    /* J11 — Jeudi 15 octobre */
+    {
+      morning:   { i: "🎯", t: "Piso, encore quelques jours et c'est fini. Tu peux le faire." },
+      afternoon: { i: "⭐", t: "Chaque heure qui passe Piso, c'est une heure de gagnée. Bravo." }
+    },
+    /* J12 — Vendredi 16 octobre */
+    {
+      morning:   { i: "🎈", t: "Dernier vendredi d'examens Piso, le week-end t'attend." },
+      afternoon: { i: "🌈", t: "Piso, tu approches de la fin. Sois fière du chemin parcouru." }
+    },
+    /* J13 — Samedi 17 octobre (REPOS) */
+    {
+      morning:   { i: "🍃", t: "Repos bien mérité Piso ! Écoute ton corps, il a besoin de pause." },
+      afternoon: { i: "🧘‍♀️", t: "Piso, une journée pour toi. Petite révision, gros dodo." }
+    },
+    /* J14 — Dimanche 18 octobre (REPOS) */
+    {
+      morning:   { i: "🛋️", t: "Dimanche tranquille Piso, demain c'est le dernier ! Repose-toi." },
+      afternoon: { i: "🌙", t: "Dernière ligne droite Piso. Une bonne nuit et c'est parti." }
+    },
+    /* J15 — Lundi 19 octobre (DERNIER JOUR) */
+    {
+      morning:   { i: "🎉", t: "Piso, c'est le dernier jour ! Donne tout, c'est la fin." },
+      afternoon: { i: "🎓", t: "C'EST FINI PISO ! Tu l'as fait ! Bravo mille fois ! 🎉" }
+    }
+  ];
+
+  /* Messages APRÈS les examens (rotatif) */
+  const POST_EXAM_MESSAGES = [
+    { i: "🎓", t: "Piso, tu as tout terminé ! Repose-toi bien, tu l'as amplement mérité. 💛" },
+    { i: "🌸", t: "Piso, savoure cette liberté retrouvée. Tu peux être immensément fière de toi." },
+    { i: "🌈", t: "Piso, tu as accompli quelque chose d'immense. Bravo du fond du cœur." },
+    { i: "🕊️", t: "Piso, respire, tu es libre. Prends du temps pour toi maintenant." },
+    { i: "☀️", t: "Piso, le soleil brille à nouveau. Profite de chaque instant." },
+    { i: "🎀", t: "Piso, tu as tout donné. Maintenant, c'est à toi de te chouchouter." }
   ];
 
   let chapters = [];
   let themes = [];
-  let examDoneThemes = [];   /* ⬅️ Thèmes dont l'examen est terminé (cochés) */
+  let examDoneThemes = [];
   let user = null;
   let dataListener = null;
   let lastGridDayKey = '';
@@ -910,9 +1003,39 @@
     toast._timer = setTimeout(() => toast.classList.remove('show'), 4000);
   }
 
+  /* ⬇️ Sélectionne le message d'encouragement selon :
+     - la phase (avant / pendant / après les examens)
+     - le jour d'examen précis (de J1 à J15)
+     - le moment de la journée (matin < 12h / après-midi ≥ 12h) */
   function displayEncouragement() {
-    const index = Math.floor(Date.now() / HALF_DAY_MS) % ENCOURAGEMENTS.length;
-    const item = ENCOURAGEMENTS[index];
+    const now = new Date();
+    const today = startOfDay(now);
+    const examStart = startOfDay(EXAM_START);
+    const examEnd = startOfDay(EXAM_END);
+
+    const dayOffset = Math.round(
+      (today.getTime() - examStart.getTime()) / 86400000
+    );
+    const isMorning = now.getHours() < 12;
+
+    let item;
+
+    if (today.getTime() < examStart.getTime()) {
+      /* AVANT les examens — rotation libre toutes les 12h */
+      const idx = Math.floor(Date.now() / HALF_DAY_MS) % PRE_EXAM_MESSAGES.length;
+      item = PRE_EXAM_MESSAGES[idx];
+    } else if (today.getTime() <= examEnd.getTime()
+               && dayOffset >= 0
+               && dayOffset < EXAM_MESSAGES.length) {
+      /* PENDANT les examens — message du jour + matin/après-midi */
+      const dayMsgs = EXAM_MESSAGES[dayOffset];
+      item = isMorning ? dayMsgs.morning : dayMsgs.afternoon;
+    } else {
+      /* APRÈS les examens — rotation libre */
+      const idx = Math.floor(Date.now() / HALF_DAY_MS) % POST_EXAM_MESSAGES.length;
+      item = POST_EXAM_MESSAGES[idx];
+    }
+
     elements.dailyMessageIcon.textContent = item.i;
     elements.dailyMessageText.textContent = item.t;
   }
@@ -929,10 +1052,6 @@
     return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / 86400000);
   }
 
-  /* ⬇️ Met à jour la visibilité de la carte de félicitations.
-     Affichée SI :
-        - La période d'examens est terminée (au-delà du 19 octobre), OU
-        - Tous les thèmes existants ont leur case "examen terminé" cochée. */
   function updateCongratsCard() {
     const today = startOfDay(new Date());
     const examEnd = startOfDay(EXAM_END);
@@ -950,10 +1069,6 @@
     }
   }
 
-  /* ⬇️ Calendrier : du 5 au 19 octobre (jours d'examens)
-     - Jours DÉJÀ PASSÉS  → mis en valeur (vert foncé)
-     - Aujourd'hui        → mis en valeur + animation
-     - Jours PAS ENCORE passés → couleur claire, NON mis en valeur */
   function renderDayGrid() {
     const today = startOfDay(new Date());
     const examStart = startOfDay(EXAM_START);
@@ -1055,7 +1170,6 @@
       const dotColor = colorMap[theme] || '#D4788A';
       const safeTheme = escapeHtml(theme);
 
-      /* ⬇️ État de la case "examen terminé" du thème */
       const examDone = examDoneThemes.includes(theme);
       const examCheckCls = examDone ? 'checked' : '';
       const cardCls = examDone ? 'exam-done' : '';
@@ -1155,7 +1269,6 @@
       });
     });
 
-    /* ⬇️ Cases "examen terminé" devant chaque thème */
     elements.chapterList.querySelectorAll('.exam-check').forEach((el) => {
       el.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -1164,7 +1277,6 @@
     });
   }
 
-  /* ⬇️ Bascule l'état "examen terminé" pour un thème */
   function toggleExamDone(theme) {
     if (!user) { showToast('Veuillez vous connecter.'); return; }
     const idx = examDoneThemes.indexOf(theme);
@@ -1262,7 +1374,6 @@
     themes = themes.filter((t) => t !== theme);
     database.ref('data/themes').set(themes);
 
-    /* On retire aussi le thème de la liste des examens terminés */
     if (examDoneThemes.includes(theme)) {
       examDoneThemes = examDoneThemes.filter((t) => t !== theme);
       database.ref('data/examThemes').set(examDoneThemes);
@@ -1280,7 +1391,6 @@
       if (!dataListener) {
         dataListener = database.ref('data').on('value', (snapshot) => {
           const data = snapshot.val() || {};
-          /* ⬇️ On exclut 'themes' ET 'examThemes' des clés chapitres */
           const chapterKeys = Object.keys(data).filter(
             (key) => key !== 'themes' && key !== 'examThemes'
           );
