@@ -112,23 +112,6 @@
       font-weight: 600; word-break: break-word;
     }
 
-    /* ═══════════════ MESSAGE DU JOUR ═══════════════ */
-    .daily-message {
-      background: var(--card-bg);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 16px; margin: 0 0 14px;
-      display: flex; align-items: center; gap: 12px;
-      box-shadow: var(--shadow); transition: opacity 0.4s;
-    }
-
-    .daily-message-icon { font-size: 1.8rem; flex-shrink: 0; }
-
-    .daily-message p {
-      font-size: 0.95rem; font-weight: 600;
-      color: var(--navy); margin: 0; line-height: 1.4; word-break: break-word;
-    }
-
     /* ═══════════════ CARTE DE FÉLICITATIONS FINALE ═══════════════ */
     .congrats-card {
       display: none;
@@ -180,79 +163,6 @@
     @keyframes congratsBounce {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-6px); }
-    }
-
-    /* ═══════════════ CALENDRIER DES EXAMENS ═══════════════ */
-    .day-grid-card {
-      background: var(--card-bg);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px 14px 16px; margin-bottom: 14px;
-    }
-
-    .day-grid-head {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 10px; gap: 8px; flex-wrap: wrap;
-    }
-
-    .day-grid-title {
-      font-weight: 800; color: var(--green); font-size: 0.85rem;
-      text-transform: uppercase; letter-spacing: 0.05em; word-break: break-word;
-    }
-
-    .day-grid-count {
-      background: var(--green); color: white; border-radius: 50px;
-      font-size: 0.7rem; font-weight: 700; padding: 3px 10px;
-      white-space: nowrap; box-shadow: 0 2px 8px rgba(76, 175, 130, 0.25);
-    }
-
-    .day-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
-      gap: 6px;
-    }
-
-    /* Cellule de base (utilisée aussi pour les jours futurs) */
-    .day-cell {
-      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-      border-radius: 10px; font-weight: 700; font-size: 0.82rem;
-      background: #FFFFFF; border: 1.5px solid var(--border); color: var(--muted);
-      transition: transform 0.2s; font-variant-numeric: tabular-nums;
-    }
-
-    /* Jour déjà passé → mis en valeur (vert foncé) */
-    .day-cell.past {
-      background: linear-gradient(135deg, var(--green-dark), #1F6B4A);
-      color: white; border-color: transparent;
-      box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.20);
-    }
-
-    /* Aujourd'hui → mis en valeur + animation pulsée */
-    .day-cell.today {
-      background: linear-gradient(135deg, var(--green), var(--green2));
-      color: white; border-color: transparent;
-      box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.25);
-      animation: todayGlow 2.6s ease-in-out infinite;
-    }
-
-    /* Jour à venir → clair, non mis en valeur */
-    .day-cell.future {
-      background: #FFFFFF;
-      border: 1.5px solid var(--border);
-      color: var(--muted);
-      box-shadow: none;
-    }
-
-    @keyframes todayGlow {
-      0%, 100% { box-shadow: 0 0 0 3px rgba(76, 175, 130, 0.22); }
-      50% { box-shadow: 0 0 0 8px rgba(76, 175, 130, 0.38); }
-    }
-
-    .day-grid-done {
-      text-align: center; padding: 24px 10px;
-      color: var(--green-dark); font-weight: 700;
-      font-size: 0.95rem; line-height: 1.5;
     }
 
     /* ═══════════════ STATISTIQUES (4 cartes) ═══════════════ */
@@ -706,9 +616,6 @@
       .toast { font-size: 0.85rem; padding: 10px 16px; }
       .payment-text { font-size: 0.82rem; padding: 12px 10px; }
       .login-box { padding: 1.5rem; }
-      .day-grid { grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 5px; }
-      .day-cell { font-size: 0.75rem; border-radius: 8px; }
-      .day-grid-title { font-size: 0.78rem; }
       .congrats-title { font-size: 1.35rem; }
       .congrats-emoji { font-size: 2.8rem; }
       .congrats-text { font-size: 0.9rem; }
@@ -728,8 +635,6 @@
       .theme-title { font-size: 0.85rem; }
       .theme-badge { font-size: 0.6rem; padding: 2px 8px; }
       .payment-text { font-size: 0.76rem; padding: 10px 8px; }
-      .day-grid { grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 4px; }
-      .day-cell { font-size: 0.68rem; border-radius: 7px; }
       .exam-check { width: 22px; height: 22px; min-width: 22px; min-height: 22px; }
       .exam-check::before { font-size: 0.65rem; }
     }
@@ -776,21 +681,6 @@
       Tu peux être immensément fière de toi. 💛
     </div>
     <div class="congrats-signature">— Repose-toi bien, tu l'as mérité —</div>
-  </div>
-
-  <!-- Message d'encouragement dynamique -->
-  <div class="daily-message" id="dailyMessage">
-    <div class="daily-message-icon" id="dailyMessageIcon">🌿</div>
-    <p id="dailyMessageText"></p>
-  </div>
-
-  <!-- Calendrier des examens (5 → 19 octobre) -->
-  <div class="day-grid-card">
-    <div class="day-grid-head">
-      <span class="day-grid-title" id="dayGridTitle">Examens · 5 → 19 octobre</span>
-      <span class="day-grid-count" id="dayGridCount">—</span>
-    </div>
-    <div class="day-grid" id="dayGrid"></div>
   </div>
 
   <!-- Statistiques : Tout / Fini / Pas finis / Relus -->
@@ -888,106 +778,8 @@
      CONSTANTES GLOBALES
      ═════════════════════════════════════════════════════════════════════ */
 
-  /* Période d'examens : du 5 au 19 octobre 2026 (mois 9 = octobre) */
-  const EXAM_START = new Date(2026, 9, 5, 0, 0, 0);
-  const EXAM_END   = new Date(2026, 9, 19, 0, 0, 0);
-
-  /* Durée d'une demi-journée (utilisée pour changer les messages toutes les 12h) */
-  const HALF_DAY_MS = 12 * 60 * 60 * 1000;
-
-  /* ═════════════════════════════════════════════════════════════════════
-     MESSAGES D'ENCOURAGEMENT PERSONNALISÉS POUR PISO
-     (3 phases : avant / pendant / après les examens)
-     ═════════════════════════════════════════════════════════════════════ */
-
-  /* ---------- Messages AVANT les examens (préparation) ---------- */
-  const PRE_EXAM_MESSAGES = [
-    { i: "🌿", t: "Piso, tu avances un chapitre à la fois. Doucement mais sûrement." },
-    { i: "☀️", t: "Piso, chaque page lue aujourd'hui est une victoire tranquille." },
-    { i: "💪", t: "Piso, tu es plus forte que tu ne le penses. Vraiment." },
-    { i: "🌸", t: "Piso, prends ton temps, tu n'as rien à prouver à personne." },
-    { i: "📚", t: "Piso, un petit pas aujourd'hui vaut mieux qu'un grand demain." },
-    { i: "🫶", t: "Piso, tu fais de ton mieux, et c'est déjà énorme." },
-    { i: "🌙", t: "Piso, repose-toi quand il faut, tu reviendras plus forte." },
-    { i: "✨", t: "Piso, ta régularité vaut tous les talents du monde." },
-    { i: "🌱", t: "Piso, chaque révision fait pousser un peu plus ta confiance." },
-    { i: "🍀", t: "Piso, respire. Tu es exactement là où tu dois être." },
-    { i: "💛", t: "Piso, je crois en toi. Vraiment, du fond du cœur." },
-    { i: "🎈", t: "Piso, un chapitre coché et tu peux être fière de toi." },
-    { i: "🌻", t: "Piso, les efforts d'aujourd'hui seront ta réussite de demain." },
-    { i: "🧸", t: "Piso, sois aussi douce avec toi que tu l'es avec les autres." },
-    { i: "🔆", t: "Piso, tu es capable de grandes choses, une page à la fois." },
-    { i: "🌊", t: "Piso, laisse les choses avancer à leur rythme, sans pression." },
-    { i: "🕊️", t: "Piso, un jour à la fois, un objectif à la fois." },
-    { i: "🍃", t: "Piso, ta patience finira par payer, tu verras." },
-    { i: "⭐", t: "Piso, tu es sur le bon chemin, continue comme ça." },
-    { i: "🎀", t: "Piso, bravo pour tout ce que tu as déjà accompli." },
-    { i: "🌈", t: "Piso, après l'effort vient toujours la lumière." },
-    { i: "💗", t: "Piso, tu mérites de réussir, et tu vas y arriver." },
-    { i: "🧠", t: "Piso, chaque relecture rend ton savoir plus solide." },
-    { i: "🎯", t: "Piso, objectif : 5 octobre 2026. Tu y arriveras." }
-  ];
-
-  /* ---------- Messages PENDANT les examens (30 messages uniques) ----------
-     Index 0 → J1 (lundi 5 octobre)  ...  Index 14 → J15 (lundi 19 octobre)
-     - 5 messages par phase (J1→J5 puis J8→J12 puis J15) + weekends repos (J6, J7, J13, J14) */
-  const EXAM_MESSAGES = [
-    /* J1 — Lundi 5 octobre : début des examens */
-    { morning:   { i: "🌅", t: "Piso, le grand jour est arrivé. Respire un bon coup, tu es prête." },
-      afternoon: { i: "💪", t: "Premier examen terminé Piso ! Un poids en moins, continue comme ça." } },
-    /* J2 — Mardi 6 octobre */
-    { morning:   { i: "☀️", t: "Nouvelle journée Piso, nouvelle chance de briller. Fais-toi confiance." },
-      afternoon: { i: "🌙", t: "Tu tiens le rythme Piso, c'est impressionnant. Repose-toi bien ce soir." } },
-    /* J3 — Mercredi 7 octobre */
-    { morning:   { i: "🌱", t: "Piso, chaque épreuve te rend plus forte. Tu vas y arriver." },
-      afternoon: { i: "✨", t: "Mi-semaine Piso, tu avances à merveille. Sois fière de toi." } },
-    /* J4 — Jeudi 8 octobre */
-    { morning:   { i: "💛", t: "Bonjour Piso, respire, souris, tu connais ton sujet." },
-      afternoon: { i: "🎀", t: "Encore une journée de gagnée Piso, tu gères super bien." } },
-    /* J5 — Vendredi 9 octobre */
-    { morning:   { i: "🔥", t: "Piso, dernière ligne droite avant le week-end. Donne tout !" },
-      afternoon: { i: "🌸", t: "Bravo Piso, semaine bien entamée. Le repos arrive bientôt." } },
-    /* J6 — Samedi 10 octobre (REPOS) */
-    { morning:   { i: "🛌", t: "Piso, aujourd'hui c'est repos ! Dors, respire, fais-toi du bien." },
-      afternoon: { i: "🧸", t: "Prends soin de toi Piso, tu l'as bien mérité. Petite révision si envie." } },
-    /* J7 — Dimanche 11 octobre (REPOS) */
-    { morning:   { i: "🕊️", t: "Dimanche doux pour toi Piso. Repose ton esprit, il travaille dur." },
-      afternoon: { i: "🌙", t: "Piso, une petite relecture tranquille et hop, au lit tôt." } },
-    /* J8 — Lundi 12 octobre */
-    { morning:   { i: "🚀", t: "Nouvelle semaine Piso, tu repars avec la pêche !" },
-      afternoon: { i: "👑", t: "Piso, tu gères cette semaine comme une cheffe. Continue !" } },
-    /* J9 — Mardi 13 octobre */
-    { morning:   { i: "🌟", t: "Courage Piso, tu es plus qu'à mi-parcours. La fin se rapproche." },
-      afternoon: { i: "💗", t: "Piso, tu es une warrior. Chaque épreuve te rapproche du but." } },
-    /* J10 — Mercredi 14 octobre */
-    { morning:   { i: "🔆", t: "Bonjour Piso, la lumière au bout du tunnel se voit déjà." },
-      afternoon: { i: "🌿", t: "Tu tiens bon Piso, c'est admirable. Repose-toi bien ce soir." } },
-    /* J11 — Jeudi 15 octobre */
-    { morning:   { i: "🎯", t: "Piso, encore quelques jours et c'est fini. Tu peux le faire." },
-      afternoon: { i: "⭐", t: "Chaque heure qui passe Piso, c'est une heure de gagnée. Bravo." } },
-    /* J12 — Vendredi 16 octobre */
-    { morning:   { i: "🎈", t: "Dernier vendredi d'examens Piso, le week-end t'attend." },
-      afternoon: { i: "🌈", t: "Piso, tu approches de la fin. Sois fière du chemin parcouru." } },
-    /* J13 — Samedi 17 octobre (REPOS) */
-    { morning:   { i: "🍃", t: "Repos bien mérité Piso ! Écoute ton corps, il a besoin de pause." },
-      afternoon: { i: "🧘‍♀️", t: "Piso, une journée pour toi. Petite révision, gros dodo." } },
-    /* J14 — Dimanche 18 octobre (REPOS) */
-    { morning:   { i: "🛋️", t: "Dimanche tranquille Piso, demain c'est le dernier ! Repose-toi." },
-      afternoon: { i: "🌙", t: "Dernière ligne droite Piso. Une bonne nuit et c'est parti." } },
-    /* J15 — Lundi 19 octobre : dernier jour */
-    { morning:   { i: "🎉", t: "Piso, c'est le dernier jour ! Donne tout, c'est la fin." },
-      afternoon: { i: "🎓", t: "C'EST FINI PISO ! Tu l'as fait ! Bravo mille fois ! 🎉" } }
-  ];
-
-  /* ---------- Messages APRÈS les examens (rotation) ---------- */
-  const POST_EXAM_MESSAGES = [
-    { i: "🎓", t: "Piso, tu as tout terminé ! Repose-toi bien, tu l'as amplement mérité. 💛" },
-    { i: "🌸", t: "Piso, savoure cette liberté retrouvée. Tu peux être immensément fière de toi." },
-    { i: "🌈", t: "Piso, tu as accompli quelque chose d'immense. Bravo du fond du cœur." },
-    { i: "🕊️", t: "Piso, respire, tu es libre. Prends du temps pour toi maintenant." },
-    { i: "☀️", t: "Piso, le soleil brille à nouveau. Profite de chaque instant." },
-    { i: "🎀", t: "Piso, tu as tout donné. Maintenant, c'est à toi de te chouchouter." }
-  ];
+  /* Fin de la période d'examens : 19 octobre 2026 (mois 9 = octobre) */
+  const EXAM_END = new Date(2026, 9, 19, 0, 0, 0);
 
   /* ═════════════════════════════════════════════════════════════════════
      ÉTAT GLOBAL DE L'APPLICATION
@@ -999,7 +791,6 @@
                                 /* (utilisé pour garder un thème déplié même après coche) */
   let user = null;              /* Utilisateur Firebase courant */
   let dataListener = null;      /* Référence du listener Firebase temps réel */
-  let lastGridDayKey = '';      /* Dernière date rendue dans le calendrier (pour reset minuit) */
 
   /* Raccourci pratique : document.getElementById */
   const $ = (id) => document.getElementById(id);
@@ -1032,11 +823,6 @@
     loginError: $('loginError'),
     authStatus: $('authStatus'),
     logoutBtn: $('logoutBtn'),
-    dayGrid: $('dayGrid'),
-    dayGridCount: $('dayGridCount'),
-    dayGridTitle: $('dayGridTitle'),
-    dailyMessageIcon: $('dailyMessageIcon'),
-    dailyMessageText: $('dailyMessageText'),
     congratsCard: $('congratsCard')
   };
 
@@ -1060,60 +846,9 @@
     toast._timer = setTimeout(() => toast.classList.remove('show'), 4000);
   }
 
-  /* Renvoie une clé de date locale unique "YYYY-M-D" (pour comparaison de jours) */
-  function dateKey(d) {
-    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-  }
-
   /* Renvoie la date à minuit (début de journée) */
   function startOfDay(d) {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  }
-
-  /* Nombre de jours entiers entre deux dates (arrondi) */
-  function diffDays(from, to) {
-    return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / 86400000);
-  }
-
-  /* ═════════════════════════════════════════════════════════════════════
-     MESSAGE D'ENCOURAGEMENT DYNAMIQUE
-     Détermine le message à afficher selon :
-       - la phase (avant / pendant / après les examens),
-       - le jour précis (J1 à J15),
-       - le moment de la journée (matin < 12h / après-midi ≥ 12h).
-     ═════════════════════════════════════════════════════════════════════ */
-  function displayEncouragement() {
-    const now = new Date();
-    const today = startOfDay(now);
-    const examStart = startOfDay(EXAM_START);
-    const examEnd = startOfDay(EXAM_END);
-
-    /* Nombre de jours écoulés depuis le début des examens (0 = J1) */
-    const dayOffset = Math.round((today.getTime() - examStart.getTime()) / 86400000);
-    const isMorning = now.getHours() < 12;
-
-    let item;
-
-    if (today.getTime() < examStart.getTime()) {
-      /* --- Phase AVANT les examens --- */
-      const idx = Math.floor(Date.now() / HALF_DAY_MS) % PRE_EXAM_MESSAGES.length;
-      item = PRE_EXAM_MESSAGES[idx];
-    } else if (
-      today.getTime() <= examEnd.getTime() &&
-      dayOffset >= 0 &&
-      dayOffset < EXAM_MESSAGES.length
-    ) {
-      /* --- Phase PENDANT les examens --- */
-      const dayMsgs = EXAM_MESSAGES[dayOffset];
-      item = isMorning ? dayMsgs.morning : dayMsgs.afternoon;
-    } else {
-      /* --- Phase APRÈS les examens --- */
-      const idx = Math.floor(Date.now() / HALF_DAY_MS) % POST_EXAM_MESSAGES.length;
-      item = POST_EXAM_MESSAGES[idx];
-    }
-
-    elements.dailyMessageIcon.textContent = item.i;
-    elements.dailyMessageText.textContent = item.t;
   }
 
   /* ═════════════════════════════════════════════════════════════════════
@@ -1138,64 +873,6 @@
     } else {
       elements.congratsCard.classList.remove('show');
     }
-  }
-
-  /* ═════════════════════════════════════════════════════════════════════
-     CALENDRIER DES EXAMENS (5 → 19 octobre)
-     - Jours passés  : fond vert foncé (mise en valeur)
-     - Aujourd'hui   : fond vert + animation
-     - Jours futurs  : fond blanc clair (non mis en valeur)
-     ═════════════════════════════════════════════════════════════════════ */
-  function renderDayGrid() {
-    const today = startOfDay(new Date());
-    const examStart = startOfDay(EXAM_START);
-    const examEnd = startOfDay(EXAM_END);
-
-    /* Mémorise le jour courant pour détecter le passage à minuit */
-    lastGridDayKey = dateKey(today);
-
-    /* Titre dynamique */
-    if (today.getTime() < examStart.getTime()) {
-      elements.dayGridTitle.textContent = "Examens à venir · 5 → 19 octobre";
-    } else if (today.getTime() > examEnd.getTime()) {
-      elements.dayGridTitle.textContent = "Examens terminés";
-    } else {
-      elements.dayGridTitle.textContent = "Examens en cours · 5 → 19 octobre";
-    }
-
-    /* Compteur de jours restants */
-    let countText;
-    if (today.getTime() > examEnd.getTime()) {
-      countText = 'Terminé';
-    } else if (today.getTime() < examStart.getTime()) {
-      const n = diffDays(today, examStart);
-      countText = 'J-' + n;
-    } else {
-      const n = diffDays(today, examEnd);
-      countText = n === 0 ? 'Dernier jour' : n + (n > 1 ? ' jours restants' : ' jour restant');
-    }
-    elements.dayGridCount.textContent = countText;
-
-    /* Si les examens sont finis, on affiche uniquement un message */
-    if (today.getTime() > examEnd.getTime()) {
-      elements.dayGrid.innerHTML = '<div class="day-grid-done">🎉 Les examens sont terminés, bravo Piso !</div>';
-      return;
-    }
-
-    /* Génération des cellules : du 5 au 19 octobre */
-    let html = '';
-    const cursor = new Date(examStart.getTime());
-    while (cursor.getTime() <= examEnd.getTime()) {
-      const t = cursor.getTime();
-      let cls = 'day-cell';
-      if (t < today.getTime()) cls += ' past';          /* déjà passé */
-      else if (t === today.getTime()) cls += ' today';  /* aujourd'hui */
-      else cls += ' future';                            /* à venir */
-      html += '<div class="' + cls + '">' + cursor.getDate() + '</div>';
-      cursor.setDate(cursor.getDate() + 1);
-    }
-
-    elements.dayGrid.innerHTML = html;
   }
 
   /* ═════════════════════════════════════════════════════════════════════
@@ -1704,22 +1381,8 @@
      INITIALISATION AU CHARGEMENT DE LA PAGE
      ═════════════════════════════════════════════════════════════════════ */
 
-  /* Affichage du premier message + rafraîchissement toutes les minutes */
-  displayEncouragement();
-  setInterval(displayEncouragement, 60000);
-
-  /* Calendrier + carte félicitations, rafraîchis toutes les minutes
-     (pour détecter le passage à minuit) */
-  renderDayGrid();
+  /* Carte félicitations */
   updateCongratsCard();
-  setInterval(() => {
-    const now = new Date();
-    const key = dateKey(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
-    if (key !== lastGridDayKey) {
-      renderDayGrid();
-      updateCongratsCard();
-    }
-  }, 60000);
 
   /* Premier rendu (seront re-rendus après la connexion Firebase) */
   renderStats();
